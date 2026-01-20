@@ -1,0 +1,261 @@
+---
+import HomeSessionsList from '../components/home/HomeSessionsList.astro';
+import SessionsMap from '../components/Map.astro';
+import Layout from '../layouts/Layout.astro';
+import { fetchSessionLocations } from '../lib/api';
+
+// Term dates for 2026
+// const TERM_DATES = {
+// 	special: { name: 'Special Intensive', start: '2026-01-19', end: '2026-01-23' },
+// 	term_1: { name: 'Term 1', start: '2026-02-09', end: '2026-04-02' },
+// 	term_2: { name: 'Term 2', start: '2026-04-20', end: '2026-07-03' },
+// 	term_3: { name: 'Term 3', start: '2026-07-20', end: '2026-09-25' },
+// 	term_4: { name: 'Term 4', start: '2026-10-12', end: '2026-12-18' },
+// };
+
+// Determine current or next active term (keeping for future use)
+// function getCurrentOrNextTerm() {
+// 	const now = new Date();
+// 	const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+// 	
+// 	// Check if we're currently in any term
+// 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
+// 		if (today && today >= term.start && today <= term.end) {
+// 			return { blockType, ...term, isCurrent: true };
+// 		}
+// 	}
+// 	
+// 	// Find next upcoming term
+// 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
+// 		if (today && today < term.start) {
+// 			return { blockType, ...term, isCurrent: false };
+// 		}
+// 	}
+// 	
+// 	// If no upcoming term this year, return null (will show all sessions)
+// 	return null;
+// }
+
+// Get current or next term (used for filtering sessions)
+// const currentOrNextTerm = getCurrentOrNextTerm();
+
+const sessionLocations = await fetchSessionLocations();
+const allSessions = sessionLocations.flatMap((l) => l.sessions);
+
+// Split sessions into term sessions and special sessions
+const termSessions = allSessions.filter(s => !s.blocks?.includes('Special'));
+const specialSessions = allSessions.filter(s => s.blocks?.includes('Special'));
+
+const regions = Array.from(new Set(allSessions.map((s) => s.location))).filter(Boolean);
+
+const ageGroups = Array.from(
+	new Set(allSessions.map((s) => (s.age || '').split('(')[0]?.trim()).filter(Boolean)),
+).sort();
+
+const totalCount = allSessions.length;
+---
+
+<Layout>
+	<main>
+		<!-- Map Section (shown based on client-side filtering) -->
+		<section class="map-container hidden bg-gray-50 py-12">
+			<div class="container-custom">
+				<div class="mx-auto max-w-6xl">
+					<h2 class="mb-6 text-center text-2xl font-bold text-gray-900">
+						Session Locations
+					</h2>
+					<div id="map-wrapper">
+					<SessionsMap sessions={allSessions} mapId="home-map" height={600} framed />
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Filters Section -->
+		<section class="border-b border-gray-200 bg-white py-8">
+			<div class="container-custom">
+				<div class="mx-auto max-w-6xl">
+					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						<label class="block">
+							<span class="mb-2 block text-sm font-semibold text-gray-700">Search</span>
+							<input
+								id="session-search"
+								type="search"
+								placeholder="Name or location..."
+								class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors placeholder:text-gray-400 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								data-testid="search-input"
+							/>
+						</label>
+						<label class="block">
+							<span class="mb-2 block text-sm font-semibold text-gray-700">Region</span>
+							<select
+								id="filter-region"
+								class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								data-testid="region-select"
+							>
+								<option value="all">All regions</option>
+								{regions.map((r) => (
+									<option value={r}>
+										{r}
+									</option>
+								))}
+							</select>
+						</label>
+						<label class="block">
+							<span class="mb-2 block text-sm font-semibold text-gray-700">Age Group</span>
+							<select
+								id="filter-age"
+								class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								data-testid="age-select"
+							>
+								<option value="all">All ages</option>
+								{ageGroups.map((g) => (
+									<option value={g}>
+										{g}
+									</option>
+								))}
+							</select>
+						</label>
+						<div class="flex flex-col justify-end gap-2">
+							<button
+								id="clear-filters-btn"
+								type="button"
+								class="btn btn-secondary w-full"
+								data-testid="clear-filters-btn"
+							>
+								Clear Filters
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Sessions List Section -->
+		<section class="bg-white py-16" id="sessions">
+			<div class="container-custom">
+				<div class="mx-auto max-w-6xl">
+					<div class="mb-8">
+						<div class="flex flex-wrap items-baseline justify-between gap-4">
+							<h2 class="text-3xl font-bold text-gray-900">Available Sessions</h2>
+							<p id="session-count" class="text-sm text-gray-600" data-testid="session-count">
+								Showing {totalCount} of {totalCount} {totalCount === 1 ? 'session' : 'sessions'}
+							</p>
+						</div>
+					</div>
+
+					<div id="sessions-container">
+						<HomeSessionsList sessions={termSessions} regions={regions} />
+						
+						{specialSessions.length > 0 && (
+							<div class="mt-12">
+								<h2 class="text-2xl font-bold text-gray-900 mb-4">Special Sessions</h2>
+								<HomeSessionsList sessions={specialSessions} regions={regions} />
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>
+
+<!-- Inline data for filtering -->
+<script
+	is:inline
+	type="application/json"
+	id="sessions-data"
+	set:html={JSON.stringify(allSessions)}
+/>
+
+<!-- Client-side filtering script -->
+<script is:inline>
+	const searchInput = document.getElementById('session-search');
+	const regionSelect = document.getElementById('filter-region');
+	const ageSelect = document.getElementById('filter-age');
+	const clearBtn = document.getElementById('clear-filters-btn');
+	const sessionCountEl = document.getElementById('session-count');
+	const mapContainer = document.querySelector('.map-container');
+	const sessionsContainer = document.getElementById('sessions-container');
+
+	// Get all session data
+	const allSessionsData = JSON.parse(
+		document.getElementById('sessions-data')?.textContent || '[]'
+	);
+
+	// Get all session cards from the DOM
+	const getSessionCards = () =>
+		Array.from(document.querySelectorAll('[data-session-card]'));
+	const getRegionGroups = () =>
+		Array.from(document.querySelectorAll('[data-region-group]'));
+
+	// Normalize search text
+	const normalize = (value) => (value || '').toString().trim().toLowerCase();
+
+	// Filter sessions based on current input values
+	const applyFilters = () => {
+		const searchQuery = normalize(searchInput?.value);
+		const selectedRegion = (regionSelect?.value || 'all').toString();
+		const selectedAge = (ageSelect?.value || 'all').toString();
+
+		// Filter the session data
+		const filtered = allSessionsData.filter((session) => {
+			if (selectedRegion !== 'all' && session.location !== selectedRegion)
+				return false;
+			const ageGroup = (session.age || '').split('(')[0]?.trim() || '';
+			if (selectedAge !== 'all' && ageGroup !== selectedAge) return false;
+			if (!searchQuery) return true;
+			const haystack = `${session.name} ${session.address} ${session.location}`.toLowerCase();
+			return haystack.includes(searchQuery);
+		});
+
+		// Get visible session IDs
+		const visibleIds = new Set(filtered.map((s) => s.id));
+
+		// Update card visibility
+		let visibleCount = 0;
+		getSessionCards().forEach((card) => {
+			const cardId = card.dataset.sessionId;
+			const isVisible = !!cardId && visibleIds.has(cardId);
+			card.hidden = !isVisible;
+			if (isVisible) visibleCount++;
+		});
+
+		// Update region group visibility
+		getRegionGroups().forEach((group) => {
+			const hasVisible = !!group.querySelector('[data-session-card]:not([hidden])');
+			group.hidden = !hasVisible;
+		});
+
+		// Update count
+		if (sessionCountEl) {
+			const total = allSessionsData.length;
+			sessionCountEl.textContent = `Showing ${visibleCount} of ${total} ${total === 1 ? 'session' : 'sessions'}`;
+		}
+
+		// Update map visibility
+		if (mapContainer) {
+			mapContainer.classList.toggle('hidden', filtered.length === 0);
+		}
+	};
+
+	// Clear all filters
+	const handleClear = () => {
+		if (searchInput) searchInput.value = '';
+		if (regionSelect) regionSelect.value = 'all';
+		if (ageSelect) ageSelect.value = 'all';
+		applyFilters();
+	};
+
+	// Attach event listeners
+	searchInput?.addEventListener('input', applyFilters);
+	regionSelect?.addEventListener('change', applyFilters);
+	ageSelect?.addEventListener('change', applyFilters);
+	clearBtn?.addEventListener('click', handleClear);
+	
+	// Also handle clear button in empty state
+	document.getElementById('clear-filters-link')?.addEventListener('click', handleClear);
+
+	// Initial render
+	applyFilters();
+</script>

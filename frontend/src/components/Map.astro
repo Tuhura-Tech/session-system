@@ -1,0 +1,62 @@
+---
+import 'leaflet/dist/leaflet.css';
+
+import sessionsMapScript from '../scripts/sessions-map.ts?url';
+
+interface Session {
+	name: string;
+	address: string;
+	latlong: [number, number];
+	age: string;
+	signupLink?: string | null;
+	time: string;
+}
+
+interface Props {
+	sessions: Session[];
+	mapId?: string;
+	height?: number;
+	framed?: boolean;
+}
+
+const { sessions, mapId = 'map', height = 600, framed = true } = Astro.props as Props;
+---
+
+<div class={framed ? 'overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm' : ''}>
+	<div
+		id={mapId}
+		data-sessions={JSON.stringify(sessions)}
+		data-sessions-map="true"
+		class="tuhura-map w-full bg-gray-100"
+		style={`height: ${height}px;`}
+	></div>
+	<noscript>
+		<p class="mt-3 text-sm text-gray-600">JavaScript is disabled, so the map is unavailable.</p>
+	</noscript>
+</div>
+
+<script is:inline type="module" src={sessionsMapScript}></script>
+
+<style>
+	.tuhura-map {
+		width: 100%;
+		min-height: 400px;
+		position: relative;
+		z-index: 0; /* keep map below header */
+	}
+	.leaflet-container {
+		z-index: 0 !important;
+	}
+	.leaflet-top,
+	.leaflet-bottom,
+	.leaflet-pane,
+	.leaflet-popup-pane,
+	.leaflet-marker-pane {
+		z-index: 0 !important;
+	}
+	@media (max-width: 1023px) {
+		.tuhura-map {
+			min-height: 320px;
+		}
+	}
+</style>

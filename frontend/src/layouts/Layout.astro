@@ -1,0 +1,119 @@
+---
+import { getImage } from 'astro:assets';
+import heroOg from '@assets/hero.jpg';
+import DonateModal from '@components/DonateModal.astro';
+import Footer from '@components/Footer.astro';
+import type { NavItem } from '@components/Header.astro';
+import Header from '@components/Header.astro';
+import Partners from '@components/Partners.astro';
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const siteName = 'Tūhura Tech Sessions';
+
+const {
+	title = siteName,
+	description = 'Empowering the next generation through industry supported Technology Education.',
+} = Astro.props;
+
+// Preload critical assets
+const faviconImg = await getImage({
+	src: '/favicon.svg',
+	width: 32,
+	height: 32,
+});
+let shownTitle: string;
+if (title !== siteName) {
+	shownTitle = `${title} | ${siteName}`;
+} else {
+	shownTitle = siteName;
+}
+const canonicalUrl = Astro.url?.href || 'https://sessions.tuhuratech.org.nz';
+const ogImage = await getImage({ src: heroOg, width: 1200, height: 630, format: 'jpg' });
+const ogImageUrl = new URL(ogImage.src, canonicalUrl).toString();
+
+const navItems: NavItem[] = [
+	{ name: 'Account', href: '/account' },
+	{ name: 'Contact', href: 'https://tuhuratech.org.nz/contact' },
+	{
+		name: 'Resources',
+		href: '#',
+		dropdown: [
+			{ name: 'Blog', href: 'https://blog.tuhuratech.org.nz', external: true },
+			{ name: 'Wiki', href: 'https://wiki.tuhuratech.org.nz', external: true },
+		],
+	},
+];
+
+const cta: NavItem = {
+	name: 'Sessions',
+	href: '/',
+};
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/png" href={faviconImg.src} />
+		<link rel="canonical" href={canonicalUrl} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{shownTitle}</title>
+
+		<!-- Structured data -->
+		<script is:inline type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "Organization",
+				"name": "Tūhura Tech",
+				"url": "https://tuhuratech.org.nz",
+				"logo": "https://tuhuratech.org.nz/favicon.svg",
+				"sameAs": [
+					"https://www.linkedin.com/company/tūhura-tech/",
+					"https://github.com/Tuhura-Tech",
+					"https://www.facebook.com/p/Tūhura-Tech-100083052084710/"
+				]
+			}
+		</script>
+
+		<!-- Open Graph -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:image" content={ogImageUrl} />
+
+		<!-- Plausible Analytics -->
+		<!-- <script
+			is:inline
+			data-domain="sessions.tuhuratech.org.nz"
+			src="https://plausible.tuhuratech.org.nz/js/script.js"></script> -->
+	</head>
+
+	<body class="flex min-h-screen flex-col">
+		<a href="#main-content" class="skip-link">Skip to main content</a>
+		<Header navItems={navItems} cta={cta} />
+		<main id="main-content" class="grow">
+			<slot />
+		</main>
+		<Partners />
+		<Footer />
+		<DonateModal />
+		<script is:inline>
+			const headerEl = document.querySelector('header');
+			const onScroll = () => {
+				if (!headerEl) return;
+				if (window.scrollY > 2) headerEl.classList.add('scrolled');
+				else headerEl.classList.remove('scrolled');
+			};
+			window.addEventListener('scroll', onScroll, { passive: true });
+			onScroll();
+		</script>
+	</body>
+</html>

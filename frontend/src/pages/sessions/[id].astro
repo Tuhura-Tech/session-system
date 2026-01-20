@@ -1,0 +1,256 @@
+---
+import SessionsMap from '@components/Map.astro';
+import Layout from '../../layouts/Layout.astro';
+import { fetchSessionById } from '../../lib/api';
+
+export const prerender = false;
+
+// Term dates for 2026
+const TERM_DATES = {
+	special: { name: 'Special', start: '2026-01-19', end: '2026-01-23' },
+	term_1: { name: 'Term 1', start: '2026-02-09', end: '2026-04-02' },
+	term_2: { name: 'Term 2', start: '2026-04-20', end: '2026-07-03' },
+	term_3: { name: 'Term 3', start: '2026-07-20', end: '2026-09-25' },
+	term_4: { name: 'Term 4', start: '2026-10-12', end: '2026-12-18' },
+};
+
+// Determine current or next active term (keeping for future use)
+// function getCurrentOrNextTerm() {
+// 	const now = new Date();
+// 	const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+// 	
+// 	// Check if we're currently in any term
+// 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
+// 		if (today >= term.start && today <= term.end) {
+// 			return { blockType, ...term, isCurrent: true };
+// 		}
+// 	}
+// 	
+// 	// Find next upcoming term
+// 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
+// 		if (today < term.start) {
+// 			return { blockType, ...term, isCurrent: false };
+// 		}
+// 	}
+// 	
+// 	// If no upcoming term this year, return null
+// 	return null;
+// }
+
+const sessionId = Astro.params.id;
+const session = sessionId ? await fetchSessionById(sessionId) : null;
+if (!session) {
+	Astro.response.status = 404;
+}
+
+// Filter occurrences to current or next term
+let displayOccurrences: Array<{starts_at: string, ends_at: string, cancelled?: boolean}> = [];
+let displayTermInfo: {name: string, isCurrent: boolean, isSpecial: boolean} | null = null;
+
+if (session?.occurrences_by_block) {
+	const isSpecialSession = session.blocks?.includes('Special');
+	
+	if (isSpecialSession) {
+		// For special sessions, show the special block
+		const specialBlock = session.occurrences_by_block.find(b => b.block_type === 'special');
+		if (specialBlock) {
+			displayOccurrences = specialBlock.occurrences;
+			displayTermInfo = { name: specialBlock.block_name, isCurrent: false, isSpecial: true };
+		}
+	} else {
+		// For term sessions, find current or next TERM (skip special)
+		const today = new Date().toISOString().split('T')[0];
+		
+		// Check if we're in a term right now
+		for (const [blockType, term] of Object.entries(TERM_DATES)) {
+			if (blockType !== 'special' && today && today >= term.start && today <= term.end) {
+				const block = session.occurrences_by_block.find(b => b.block_name === term.name);
+				if (block) {
+					displayOccurrences = block.occurrences;
+					displayTermInfo = { name: term.name, isCurrent: true, isSpecial: false };
+					break;
+				}
+			}
+		}
+		
+		// If not in a term, find next term (skip special)
+		if (!displayTermInfo) {
+			for (const [blockType, term] of Object.entries(TERM_DATES)) {
+				if (blockType !== 'special' && today && today < term.start) {
+					const block = session.occurrences_by_block.find(b => b.block_name === term.name);
+					if (block) {
+						displayOccurrences = block.occurrences;
+						displayTermInfo = { name: term.name, isCurrent: false, isSpecial: false };
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+function formatOccurrenceRange(startsAt: string, endsAt: string): string {
+	const start = new Date(startsAt);
+	const end = new Date(endsAt);
+	const dateFmt = new Intl.DateTimeFormat('en-NZ', {
+		weekday: 'short',
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+	});
+	const timeFmt = new Intl.DateTimeFormat('en-NZ', {
+		hour: 'numeric',
+		minute: '2-digit',
+	});
+	return `${dateFmt.format(start)} • ${timeFmt.format(start)}–${timeFmt.format(end)}`;
+}
+---
+
+<Layout>
+	<main>
+		<section class="bg-gray-50 py-12 md:py-16">
+			<div class="container-custom">
+				<div class="mx-auto max-w-3xl">
+					<h1 class="mt-2 text-3xl font-bold text-gray-900 md:text-4xl">
+						{session ? session.name : 'Session not found'}
+					</h1>
+					{
+						session ? (
+							<div class="mt-5 grid gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+								<div class="flex flex-wrap items-center gap-2">
+									<span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-800">
+										{session.location}
+									</span>
+									<span
+										class={
+											session.waitlist
+												? 'inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800'
+												: 'inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800'
+										}
+									>
+										{session.waitlist ? 'Waitlist' : 'Open'}
+									</span>
+								</div>
+								<p class="text-gray-700">
+									<span class="font-semibold">Ages:</span> {session.age}
+									<span class="mx-2 text-gray-300">•</span>
+									<span class="font-semibold">When:</span> {session.time}
+								</p>
+								{session.blocks && session.blocks.length > 0 && session.blocks[0] != "Special" && (
+									<p class="text-gray-700">
+										<span class="font-semibold">Terms:</span> {session.blocks.join(', ')}
+									</p>
+								)}
+								<p class="text-gray-700">
+									<span class="font-semibold">Address:</span> {session.address}
+								</p>
+							</div>
+						) : (
+							<p class="mt-4 text-lg text-gray-600">
+								The session you are looking for does not exist.
+							</p>
+						)
+					}
+					{
+						session ? (
+							<div class="mt-6 flex flex-wrap gap-3">
+								<a class="btn btn-primary" href={`/signup?session=${session.id}`}>
+									{session.waitlist ? 'Join waitlist' : 'Sign up'}
+								</a>
+								<a class="btn btn-secondary" href="/#sessions">
+									Back to sessions
+								</a>
+							</div>
+						) : null
+					}
+				</div>
+			</div>
+		</section>
+
+		{
+			session ? (
+				<section class="py-12">
+					<div class="container-custom">
+						<div class="grid gap-6 lg:grid-cols-2">
+							<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+								<h2 class="text-xl font-semibold text-gray-900">Venue guidance</h2>
+								<div class="mt-4 space-y-5 text-gray-700">
+									{displayOccurrences && displayOccurrences.length ? (
+										<div>
+											<h3 class="font-semibold text-gray-900">
+												Session dates
+											{displayTermInfo && (
+												<span class="ml-2 text-sm font-normal text-gray-600">
+													({displayTermInfo.isSpecial 
+														? displayTermInfo.name 
+														: `${displayTermInfo.isCurrent ? 'Current Term' : 'Next Term'}: ${displayTermInfo.name}`
+													})
+													</span>
+												)}
+											</h3>
+											<ul class="mt-2 space-y-1 text-sm text-gray-700">
+												{displayOccurrences
+													.filter((o) => !o.cancelled)
+													.slice(0, 10)
+													.map((o) => (
+														<li class="flex gap-2">
+															<span class="mt-1.75 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300" />
+															{formatOccurrenceRange(o.starts_at, o.ends_at)}
+														</li>
+													))}
+											</ul>
+										</div>
+									) : null}
+									<div>
+										<h3 class="font-semibold text-gray-900">How to get there / where to enter</h3>
+										<p class="mt-1">
+											{session.public_instructions ||
+												'Please arrive at the venue address. If you are unsure where to enter, ask at reception or contact us for help.'}
+										</p>
+									</div>
+									<div>
+										<h3 class="font-semibold text-gray-900">On arrival</h3>
+										<p class="mt-1">
+											{session.arrival_instructions ||
+												'Please arrive a few minutes early. Our mentors will help you get checked in.'}
+										</p>
+									</div>
+									{session.what_to_bring ? (
+										<div>
+											<h3 class="font-semibold text-gray-900">What to bring</h3>
+											<p class="mt-1">{session.what_to_bring}</p>
+										</div>
+									) : null}
+									{session.prerequisites ? (
+										<div>
+											<h3 class="font-semibold text-gray-900">Prerequisites</h3>
+											<p class="mt-1">{session.prerequisites}</p>
+										</div>
+									) : null}
+									<div>
+										<h3 class="font-semibold text-gray-900">Questions?</h3>
+										<p class="mt-1">
+											Email us at{' '}
+											<a class="underline" href="mailto:sessions@tuhuratech.org.nz">
+												sessions@tuhuratech.org.nz
+											</a>
+										</p>
+									</div>
+								</div>
+							</div>
+							<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+								<h2 class="text-xl font-semibold text-gray-900">Location</h2>
+								{session.venueName ? <p class="mt-3 text-gray-900 font-medium">{session.venueName}</p> : null}
+								<p class="mt-3 text-gray-700">{session.address}</p>
+								<p class="mt-1 text-gray-700">{session.time}</p>
+								<div class="mt-4">
+									<SessionsMap sessions={[session]} framed={false} height={360} />
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			) : null
+		}
+	</main>
+</Layout>

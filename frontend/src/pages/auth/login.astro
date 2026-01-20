@@ -1,0 +1,93 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
+---
+
+<Layout>
+	<main class="bg-gray-50 py-12 md:py-16">
+		<div class="container-custom">
+			<div class="mx-auto max-w-md">
+				<h1 class="text-3xl font-bold text-gray-900">Sign in to your account</h1>
+				<p class="mt-2 text-gray-600">We'll send you a magic link to sign in without a password.</p>
+
+				<div id="login-form" class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+					<form id="magic-link-form">
+						<div>
+							<label for="email" class="block text-sm font-semibold text-gray-700">Email address</label>
+							<input
+								type="email"
+								id="email"
+								name="email"
+								required
+								autocomplete="email"
+								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors placeholder:text-gray-400 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								placeholder="your@email.com"
+							/>
+						</div>
+
+						<button
+							type="submit"
+							id="submit-btn"
+							class="btn btn-primary mt-6 w-full"
+						>
+							Send magic link
+						</button>
+
+						<p id="error-message" class="mt-4 hidden text-sm text-red-600"></p>
+						<p id="success-message" class="mt-4 hidden text-sm text-emerald-600"></p>
+					</form>
+				</div>
+
+				<p class="mt-6 text-center text-sm text-gray-600">
+					Don't have an account? No worries! We'll create one for you automatically when you sign in.
+				</p>
+			</div>
+		</div>
+	</main>
+</Layout>
+
+<script is:inline define:vars={{ returnTo }}>
+	const form = document.getElementById('magic-link-form');
+	const emailInput = document.getElementById('email');
+	const submitBtn = document.getElementById('submit-btn');
+	const errorMsg = document.getElementById('error-message');
+	const successMsg = document.getElementById('success-message');
+
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		
+		const email = emailInput?.value?.trim();
+		if (!email) return;
+
+		// Disable form
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Sending...';
+		errorMsg.classList.add('hidden');
+		successMsg.classList.add('hidden');
+
+		try {
+			const response = await fetch('http://localhost:8000/api/v1/auth/magic-link', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, return_to: returnTo }),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to send magic link');
+			}
+
+			// Show success
+			successMsg.textContent = `Check your email! We've sent a magic link to ${email}`;
+			successMsg.classList.remove('hidden');
+			form.reset();
+
+		} catch (error) {
+			errorMsg.textContent = 'Something went wrong. Please try again.';
+			errorMsg.classList.remove('hidden');
+		} finally {
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Send magic link';
+		}
+	});
+</script>

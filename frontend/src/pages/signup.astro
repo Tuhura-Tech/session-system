@@ -1,0 +1,231 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { fetchMe, fetchSessionById, listChildren } from '../lib/api';
+
+export const prerender = false;
+
+const sessionId = Astro.url.searchParams.get('session');
+if (!sessionId) {
+	return Astro.redirect('/');
+}
+
+const session = await fetchSessionById(sessionId);
+if (!session) {
+	Astro.response.status = 404;
+}
+
+// Check if user is logged in
+const cookieHeader = Astro.request.headers.get('cookie') ?? undefined;
+let user = null;
+let children: Array<{id: string; name: string; dateOfBirth?: string | null}> = [];
+
+try {
+	user = await fetchMe(cookieHeader);
+	if (user) {
+		children = await listChildren(cookieHeader);
+	}
+} catch (e) {
+	// Not logged in, redirect to login with return URL
+	return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+}
+
+if (!user) {
+	return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+}
+---
+
+<Layout>
+	<main class="bg-gray-50 py-12 md:py-16">
+		<div class="container-custom">
+			<div class="mx-auto max-w-2xl">
+				{session ? (
+					<>
+						<h1 class="text-3xl font-bold text-gray-900">Sign up for {session.name}</h1>
+						
+						<!-- Session Details -->
+						<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+							<div class="space-y-4">
+								<div>
+									<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">When & Where</h3>
+									<p class="mt-1 text-lg text-gray-900">{session.time}</p>
+									<p class="mt-1 text-gray-700">{session.venueName || session.location}</p>
+									{session.address && <p class="text-sm text-gray-600">{session.address}</p>}
+								</div>
+
+								{session.term_summary && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Term</h3>
+										<p class="mt-1 text-gray-900">{session.term_summary}</p>
+									</div>
+								)}
+
+								{session.age && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Age Group</h3>
+										<p class="mt-1 text-gray-900">{session.age}</p>
+									</div>
+								)}
+
+								{session.what_to_bring && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">What to Bring</h3>
+										<p class="mt-1 text-gray-900">{session.what_to_bring}</p>
+									</div>
+								)}
+
+								{session.public_instructions && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Important Information</h3>
+										<p class="mt-1 text-gray-900 whitespace-pre-line">{session.public_instructions}</p>
+									</div>
+								)}
+
+								{session.arrival_instructions && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Arrival Instructions</h3>
+										<p class="mt-1 text-gray-900 whitespace-pre-line">{session.arrival_instructions}</p>
+									</div>
+								)}
+
+								{session.prerequisites && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Prerequisites</h3>
+										<p class="mt-1 text-gray-900">{session.prerequisites}</p>
+									</div>
+								)}
+
+								{session.waitlist && (
+									<div class="rounded-lg bg-amber-50 border border-amber-200 p-3">
+										<p class="text-sm font-semibold text-amber-900">⏳ This session is currently waitlisted</p>
+										<p class="mt-1 text-sm text-amber-700">You'll be notified if a spot becomes available.</p>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{children.length === 0 ? (
+							<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+								<h2 class="text-xl font-semibold text-gray-900">Add a child first</h2>
+								<p class="mt-2 text-gray-600">
+									You need to add at least one child to your account before you can sign up for sessions.
+								</p>
+								<a href="/account" class="btn btn-primary mt-6">
+									Go to account settings
+								</a>
+							</div>
+						) : (
+							<form id="signup-form" class="mt-8 space-y-6">
+								<!-- Child Selection -->
+								<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+									<h2 class="text-xl font-semibold text-gray-900">Select child</h2>
+									<div class="mt-4 space-y-3">
+										{children.map((child) => (
+											<label class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+												<input
+													type="radio"
+													name="childId"
+													value={child.id}
+													required
+													class="h-4 w-4 text-tuhura-green focus:ring-tuhura-green"
+												/>
+												<div class="flex-1">
+													<p class="font-semibold text-gray-900">{child.name}</p>
+													{child.dateOfBirth && (
+														<p class="text-sm text-gray-600">
+															Born: {new Date(child.dateOfBirth).toLocaleDateString('en-NZ')}
+														</p>
+													)}
+												</div>
+											</label>
+										))}
+									</div>
+								</div>
+
+								<!-- Submit -->
+								<div class="flex gap-3">
+									<button type="submit" id="submit-btn" class="btn btn-primary flex-1">
+										Complete signup
+									</button>
+									<a href={`/sessions/${sessionId}`} class="btn btn-secondary flex-1 text-center">
+										Cancel
+									</a>
+								</div>
+
+								<p id="error-message" class="hidden text-sm text-red-600"></p>
+							</form>
+						)}
+					</>
+				) : (
+					<div>
+						<h1 class="text-3xl font-bold text-gray-900">Session not found</h1>
+						<p class="mt-2 text-gray-600">
+							The session you're looking for doesn't exist.
+						</p>
+						<a href="/" class="btn btn-primary mt-6">
+							Back to sessions
+						</a>
+					</div>
+				)}
+			</div>
+		</div>
+	</main>
+</Layout>
+
+<script is:inline>
+	const sessionId = new URLSearchParams(window.location.search).get('session');
+	
+	async function createAuthenticatedSignup(sessionId, input) {
+		const res = await fetch(`http://localhost:8000/api/v1/session/${sessionId}/signup`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(input),
+		});
+		if (!res.ok) throw new Error(`Failed to create signup: ${res.status}`);
+		return (await res.json());
+	}
+
+	const form = document.getElementById('signup-form');
+	const submitBtn = document.getElementById('submit-btn');
+	const errorMsg = document.getElementById('error-message');
+
+	if (form) {
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			
+			const formData = new FormData(form);
+			const childId = formData.get('childId');
+			
+			if (!childId) {
+				errorMsg.textContent = 'Please select a child';
+				errorMsg.classList.remove('hidden');
+				return;
+			}
+
+			// Disable form
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Submitting...';
+			errorMsg.classList.add('hidden');
+
+			try {
+				console.log('[Signup] Submitting form with childId:', childId);
+
+				await createAuthenticatedSignup(sessionId, {
+					childId: childId,
+				});
+
+				console.log('[Signup] Form submission successful, redirecting...');
+				// Success! Redirect to account page
+				window.location.href = '/account?signup=success';
+
+			} catch (error) {
+				console.error('[Signup] Error:', error);
+				errorMsg.textContent = 'Failed to complete signup. Please try again.';
+				errorMsg.classList.remove('hidden');
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Complete signup';
+			}
+		});
+	}
+</script>
+

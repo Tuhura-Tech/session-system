@@ -1,0 +1,3 @@
+Contact: mailto:security@tuhuratech.org.nz
+Preferred-Languages: en
+Canonical: https://sessions.tuhuratech.org.nz/.well-known/security.txt

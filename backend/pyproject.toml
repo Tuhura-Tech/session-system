@@ -1,0 +1,217 @@
+[project]
+name = "tuhura-sessions"
+version = "0.1.0"
+description = "Backend API for Tūhura Tech Sessions"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "litestar[jinja,opentelemetry,jwt,pydantic]>=2.19.0",
+    "litestar-saq[otel,hiredis]>=0.6.3",
+    "redis>=5.0.0",
+    "httpx-oauth>=0.16.1",
+    "advanced-alchemy>=1.8.2",
+    "pydantic-settings>=2.12.0",
+    "httpx>=0.28.1",
+    "uvicorn>=0.40.0",
+    "anyio>=4.12.1",
+]
+
+[dependency-groups]
+dev = [
+  {include-group = "lint"},
+  {include-group = "test"}
+]
+lint = [
+  "ty>=0.0.11",
+  "ruff>=0.0.287",
+]
+test = [
+  "pytest",
+  "pytest-xdist",
+  "pytest-mock",
+  "pytest-cov",
+  "coverage[toml]",
+  "pytest-sugar",
+  "pytest-asyncio>=0.23",
+  "pytest-databases[postgres]>=0.1.0",
+  "polyfactory",
+  "aiosqlite",
+  "asyncpg",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  'if TYPE_CHECKING:',
+  'pragma: no cover',
+  "if __name__ == .__main__.:",
+  'def __repr__',
+  'if self\.debug:',
+  'if settings\.DEBUG',
+  'raise AssertionError',
+  'raise NotImplementedError',
+  'if 0:',
+  'class .*\bProtocol\):',
+  '@(abc\.)?abstractmethod',
+]
+omit = ["*/tests/*"]
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+concurrency = ["multiprocessing"]
+omit = ["**/*/tests/*", "**/*/migrations/**/*.py", "tools/*"]
+parallel = true
+relative_files = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--cov=app",
+  "--cov-report=term-missing",
+  "--cov-report=html:htmlcov",
+  "--cov-report=xml",
+  "--cov-fail-under=65",
+  "--tb=short",
+  "-v",
+  "-ra",
+  "-n",
+  "auto",                      # Enable xdist with auto-detected worker count
+]
+filterwarnings = [
+  "ignore::DeprecationWarning:pkg_resources",
+  "ignore::DeprecationWarning:google.*",
+  "ignore::DeprecationWarning:passlib.*",
+  "ignore::DeprecationWarning:aiosql.*",
+  "ignore::DeprecationWarning:litestar.constants.*",
+  "ignore::DeprecationWarning:litestar.utils.*",
+  "ignore::DeprecationWarning:litestar.cli.*",
+  "ignore::DeprecationWarning:httpx._client",
+]
+markers = [
+  "unit: marks tests as unit tests (fast, isolated)",
+  "integration: marks tests as integration tests (slower, database)",
+  "slow: marks tests as slow running tests",
+  "auth: marks tests related to authentication",
+  "email: marks tests that send emails",
+  "external: marks tests that call external services",
+  "oauth: marks tests related to OAuth functionality",
+  "services: marks tests for service layer",
+  "models: marks tests for database models",
+  "endpoints: marks tests for API endpoints",
+  "security: marks tests for security features",
+  "teams: marks tests related to team functionality",
+]
+python_classes = ["Test*"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+
+[tool.ruff]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  '__pycache__',
+  "src/py/app/db/migrations/versions/*.py",
+]
+fix = true
+line-length = 120
+src = ["src/py", "src/py/tests"]
+target-version = "py311"
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+ignore = [
+#   "A003",    # flake8-builtins - class attribute {name} is shadowing a python builtin
+#   "A005",    # flake8-builtins - module {name} shadows a Python standard-library module
+#   "B010",    # flake8-bugbear - do not call setattr with a constant attribute value
+#   "D100",    # pydocstyle - missing docstring in public module
+#   "D101",    # pydocstyle - missing docstring in public class
+#   "D102",    # pydocstyle - missing docstring in public method
+#   "D103",    # pydocstyle - missing docstring in public function
+#   "D104",    # pydocstyle - missing docstring in public package
+#   "D105",    # pydocstyle - missing docstring in magic method
+#   "D106",    # pydocstyle - missing docstring in public nested class
+#   "D107",    # pydocstyle - missing docstring in __init__
+#   "D202",    # pydocstyle - no blank lines allowed after function docstring
+#   "D205",    # pydocstyle - 1 blank line required between summary line and description
+#   "D415",    # pydocstyle - first line should end with a period, question mark, or exclamation point
+#   "E501",    # pydocstyle line too long, handled by black
+#   "PLW2901", # pylint - for loop variable overwritten by assignment target
+#   "RUF012",  # Ruff-specific rule - annotated with classvar
+#   "ANN401",
+#   "FBT",
+#   "PLR0913", # too many arguments
+#   "PT",
+#   "TD",
+#   "ARG002",  # ignore for now; investigate
+#   "ARG003",  # ignore for now; investigate
+#   "PERF203", # ignore for now; investigate
+#   "PD011",   # pandas
+#   "PLR0912",
+#   "ISC001",
+  "COM812",
+#   "CPY001",
+#   "PGH003",
+#   "FA100",
+#   "PLC0415", # import should be at the top of the file
+#   "PLR0904", # too many public methods
+#   "PLR0917",
+#   "PGH003",
+#   "PLC2701",
+#   "PLW3201",
+#   "PLR6301",
+]
+select = ["ALL"]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# [tool.ruff.lint.per-file-ignores]
+# "__init__.py" = ['F401', 'D104']
+# "docs/**/*.*" = ["S", "B", "DTZ", "A", "TC", "ERA", "D", "RET", "E731", "RUF012", "FA100", "ARG001"]
+# "docs/conf.py" = ["FIX002", "ARG001", "INP001"]
+# "src/py/app/db/migrations/*.py" = ['D104', 'D103', 'D205', 'D212']
+# "src/py/app/db/migrations/versions/*.py" = ["ANN201", "INP001"]
+# "src/py/app/db/models/*.py" = ["PLW0108", "TC003"]
+# "src/py/tests/*.py" = ['D103', 'S101', 'D104', "PLR2004", "RUF029", "ARG001", "SLF001", "DOC", "ANN", "S"]
+# "tools/*.py" = ["INP001", "ERA001", "N999"]
+# "tools/**/*.*" = ["D", "ARG", "EM", "TRY", "G", "FBT", "INP001", "S603", "S404", "PLR0915"]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 16
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+  "classmethod",
+  "sqlalchemy.ext.declarative.declared_attr",
+  "sqlalchemy.orm.declared_attr.directive",
+  "sqlalchemy.orm.declared_attr",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ['tests', 'app']
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
