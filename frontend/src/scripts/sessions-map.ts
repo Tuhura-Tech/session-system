@@ -36,7 +36,16 @@ async function initMap(mapEl: HTMLElement): Promise<void> {
 		iconAnchor: [12, 39],
 	});
 
-	const mapRef = new LeafletMap(mapId);
+	const mapRef = new LeafletMap(mapId, {
+		attributionControl: true,
+	});
+
+	// Add tile layer first
+	new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+	}).addTo(mapRef);
+
 	const markerLayerRef = new FeatureGroup();
 	mapRef.addLayer(markerLayerRef);
 
@@ -65,11 +74,6 @@ async function initMap(mapEl: HTMLElement): Promise<void> {
 	} catch {
 		// ignore
 	}
-
-	new TileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	}).addTo(mapRef);
 }
 
 function observeAndInit(mapEl: HTMLElement): void {
@@ -91,11 +95,39 @@ function observeAndInit(mapEl: HTMLElement): void {
 
 function initAll(): void {
 	const maps = Array.from(document.querySelectorAll<HTMLElement>('[data-sessions-map="true"]'));
-	for (const mapEl of maps) observeAndInit(mapEl);
+	for (const mapEl of maps) {
+		// Mark as needing initialization
+		mapEl.dataset.mapNeedsInit = 'true';
+		observeAndInit(mapEl);
+	}
+}
+
+// Watch for when map containers become visible and retry initialization
+function watchMapVisibility(): void {
+	const observer = new MutationObserver(() => {
+		const maps = Array.from(document.querySelectorAll<HTMLElement>('[data-sessions-map="true"][data-map-needs-init="true"]'));
+		for (const mapEl of maps) {
+			const parent = mapEl.closest('.map-container');
+			if (parent && !parent.classList.contains('hidden')) {
+				delete mapEl.dataset.mapNeedsInit;
+				observeAndInit(mapEl);
+			}
+		}
+	});
+	
+	observer.observe(document.body, { 
+		attributes: true, 
+		attributeFilter: ['class'], 
+		subtree: true 
+	});
 }
 
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initAll, { once: true });
+	document.addEventListener('DOMContentLoaded', () => {
+		initAll();
+		watchMapVisibility();
+	}, { once: true });
 } else {
 	initAll();
+	watchMapVisibility();
 }
