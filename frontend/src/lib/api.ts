@@ -104,14 +104,15 @@ const defaultApiBaseUrl = 'http://localhost:8000';
 const internalApiBaseUrl = 'http://backend:8000';  // Internal Docker network URL
 
 export function getApiBaseUrl(): string {
-	// For server-side rendering, use internal Docker URL
-	// This check works in Astro because process is only available on the server
-	if (typeof process !== 'undefined' && typeof window === 'undefined') {
+	// For server-side rendering, use internal Docker URL or environment variable
+	// In Node.js/Astro SSR, globalThis is available but window is not
+	if (typeof window === 'undefined') {
+		// Server-side: use internal Docker URL
 		return internalApiBaseUrl;
 	}
 	
 	// For client-side, use the public API URL from environment
-	const envUrl = import.meta.env?.PUBLIC_BASE_URL;
+	const envUrl = import.meta.env?.PUBLIC_BASE_URL || import.meta.env?.PUBLIC_API_BASE_URL;
 	return envUrl || defaultApiBaseUrl;
 }
 
