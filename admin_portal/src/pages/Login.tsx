@@ -14,8 +14,11 @@ const Login: React.FC = () => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth flow
+    // In production, use relative URL (nginx will proxy)
+    // In development, use localhost
     const apiUrl =
-      (import.meta as any).env.VITE_API_URL || "http://localhost:8000";
+      (import.meta as any).env.VITE_API_URL || 
+      (import.meta as any).env.MODE === 'production' ? '' : 'http://localhost:8000';
     const returnTo = encodeURIComponent(window.location.origin + "/dashboard");
     window.location.href = `${apiUrl}/api/v1/admin/auth/google/start?returnTo=${returnTo}`;
   };

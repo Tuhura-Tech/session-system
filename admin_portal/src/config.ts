@@ -3,7 +3,8 @@
  */
 
 export const config = {
-  apiUrl: (import.meta as any).env.VITE_API_URL || "http://localhost:8000",
+  apiUrl: (import.meta as any).env.VITE_API_URL || 
+    (import.meta as any).env.MODE === 'production' ? '' : 'http://localhost:8000',
   appName: "Admin Portal",
   appVersion: "1.0.0",
 };
