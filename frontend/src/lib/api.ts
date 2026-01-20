@@ -100,7 +100,7 @@ export type UiSessionLocation = {
 	sessions: UiSession[];
 };
 
-const defaultApiBaseUrl = 'http://localhost:8000';
+const defaultApiBaseUrl = 'https://sessions-api.tuhuratech.org.nz';
 const internalApiBaseUrl = 'http://backend:8000';  // Internal Docker network URL
 
 export function getApiBaseUrl(): string {
