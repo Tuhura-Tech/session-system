@@ -275,10 +275,10 @@ class AdminController(Controller):
     async def list_exclusions(self, db: AsyncSession, year: int) -> list[ExclusionDateOut]:
         """List exclusion dates for a year (holidays/closures)."""
         res = await db.execute(
-            select(ExclusionDate).where(ExclusionDate.year == int(year)).order_by(ExclusionDate.date.asc())
+            select(ExclusionDate).where(ExclusionDate.year == int(year)).order_by(ExclusionDate.exclusion_date.asc())
         )
         return [
-            ExclusionDateOut(id=str(x.id), year=x.year, date=x.date, reason=x.reason)
+            ExclusionDateOut(id=str(x.id), year=x.year, date=x.exclusion_date, reason=x.reason)
             for x in res.scalars().all()
         ]
 
@@ -290,10 +290,10 @@ class AdminController(Controller):
     )
     async def create_exclusion(self, db: AsyncSession, data: ExclusionDateCreate) -> ExclusionDateOut:
         """Create an exclusion date."""
-        x = ExclusionDate(year=data.date.year, date=data.date, reason=data.reason)
+        x = ExclusionDate(year=data.date.year, exclusion_date=data.date, reason=data.reason)
         db.add(x)
         await db.flush()
-        return ExclusionDateOut(id=str(x.id), year=x.year, date=x.date, reason=x.reason)
+        return ExclusionDateOut(id=str(x.id), year=x.year, date=x.exclusion_date, reason=x.reason)
 
     @patch(
         "/exclusions/{exclusion_id:uuid}",
