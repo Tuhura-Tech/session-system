@@ -1,5 +1,5 @@
 # Frontend admin portal build
-FROM docker.io/library/node:22-alpine AS builder
+FROM docker.io/library/node:22-alpine@sha256:a9cd9bac76cf2396abf14ff0d1c3671a8175fe577ce350e62ab0fc1678050176 AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY . .
 RUN pnpm run build
 
 # Production image
-FROM docker.io/library/nginx:alpine
+FROM docker.io/library/nginx:alpine@sha256:b0f7830b6bfaa1258f45d94c240ab668ced1b3651c8a222aefe6683447c7bf55
 
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html

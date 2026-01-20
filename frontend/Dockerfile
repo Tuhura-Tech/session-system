@@ -1,5 +1,5 @@
 # Frontend public site build
-FROM docker.io/library/node:22-alpine AS builder
+FROM docker.io/library/node:22-alpine@sha256:a9cd9bac76cf2396abf14ff0d1c3671a8175fe577ce350e62ab0fc1678050176 AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY . .
 RUN pnpm run build
 
 # Production image
-FROM node:22-alpine
+FROM node:22-alpine@sha256:a9cd9bac76cf2396abf14ff0d1c3671a8175fe577ce350e62ab0fc1678050176
 
 WORKDIR /app
 
