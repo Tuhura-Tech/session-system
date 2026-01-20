@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../lib/api";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -13,14 +14,8 @@ const Login: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const handleGoogleLogin = () => {
-    // Redirect to backend Google OAuth flow
-    // In production, use relative URL (nginx will proxy)
-    // In development, use localhost
-    const apiUrl =
-      (import.meta as any).env.VITE_API_URL || 
-      (import.meta as any).env.MODE === 'production' ? '' : 'http://localhost:8000';
     const returnTo = encodeURIComponent(window.location.origin + "/dashboard");
-    window.location.href = `${apiUrl}/api/v1/admin/auth/google/start?returnTo=${returnTo}`;
+    window.location.href = `${API_BASE_URL}/api/v1/admin/auth/google/start?returnTo=${returnTo}`;
   };
 
   return (
