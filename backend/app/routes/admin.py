@@ -290,7 +290,7 @@ class AdminController(Controller):
     )
     async def create_exclusion(self, db: AsyncSession, data: ExclusionDateCreate) -> ExclusionDateOut:
         """Create an exclusion date."""
-        x = ExclusionDate(year=data.year, date=data.date, reason=data.reason)
+        x = ExclusionDate(year=data.date.year, date=data.date, reason=data.reason)
         db.add(x)
         await db.flush()
         return ExclusionDateOut(id=str(x.id), year=x.year, date=x.date, reason=x.reason)
