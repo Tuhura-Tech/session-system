@@ -3,8 +3,11 @@
  */
 
 export const config = {
-  apiUrl: (import.meta as any).env.VITE_API_URL || 
-    (import.meta as any).env.MODE === 'production' ? '' : 'http://localhost:8000',
+  // Always call the API directly (no nginx proxy)
+  apiUrl:
+    (import.meta as any).env.VITE_API_URL ||
+    (import.meta as any).env.PUBLIC_API_BASE_URL ||
+    "https://sessions-api.tuhuratech.org.nz",
   appName: "Admin Portal",
   appVersion: "1.0.0",
 };
