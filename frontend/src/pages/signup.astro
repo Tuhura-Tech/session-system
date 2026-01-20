@@ -173,9 +173,10 @@ if (!user) {
 
 <script is:inline>
 	const sessionId = new URLSearchParams(window.location.search).get('session');
+	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://localhost:8000';
 	
 	async function createAuthenticatedSignup(sessionId, input) {
-		const res = await fetch(`http://localhost:8000/api/v1/session/${sessionId}/signup`, {
+		const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: { 'Content-Type': 'application/json' },

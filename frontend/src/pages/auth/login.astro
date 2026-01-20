@@ -66,8 +66,11 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 		errorMsg.classList.add('hidden');
 		successMsg.classList.add('hidden');
 
+		// Get API base URL from environment
+		const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://localhost:8000';
+		
 		try {
-			const response = await fetch('http://localhost:8000/api/v1/auth/magic-link', {
+			const response = await fetch(`${API_BASE_URL}/api/v1/auth/magic-link`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, return_to: returnTo }),
