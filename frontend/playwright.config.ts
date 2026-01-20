@@ -82,7 +82,7 @@ export default defineConfig({
 	//   url: 'http://localhost:4324',
 	//   reuseExistingServer: !process.env.CI,
 	//   env: {
-	//     PUBLIC_API_BASE_URL: process.env.PUBLIC_API_BASE_URL || 'http://localhost:8000',
+	//     PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || 'http://localhost:8000',
 	//   },
 	// },
 });

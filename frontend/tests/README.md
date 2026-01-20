@@ -155,7 +155,7 @@ For continuous integration:
 ```bash
 # Set environment variables
 export PLAYWRIGHT_BASE_URL=http://localhost:4324
-export PUBLIC_API_BASE_URL=http://localhost:8000
+export PUBLIC_BASE_URL=http://localhost:8000
 
 # Start services in background
 docker-compose up -d

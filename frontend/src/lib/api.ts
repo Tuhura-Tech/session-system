@@ -105,10 +105,10 @@ const defaultApiBaseUrl = 'http://localhost:8000';
 export function getApiBaseUrl(): string {
 	// In SSR mode, we need to use process.env for runtime variables
 	// Check both Node.js runtime env and Astro's import.meta.env
-	if (typeof process !== 'undefined' && process.env?.PUBLIC_API_BASE_URL) {
-		return process.env.PUBLIC_API_BASE_URL;
+	if (typeof process !== 'undefined' && process.env?.PUBLIC_BASE_URL) {
+		return process.env.PUBLIC_BASE_URL;
 	}
-	return import.meta.env.PUBLIC_API_BASE_URL || defaultApiBaseUrl;
+	return import.meta.env.PUBLIC_BASE_URL || defaultApiBaseUrl;
 }
 
 export async function fetchSessionLocations(): Promise<UiSessionLocation[]> {
