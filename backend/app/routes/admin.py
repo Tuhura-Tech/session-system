@@ -846,7 +846,7 @@ class AdminController(Controller):
         ex_res = await db.execute(select(ExclusionDate).where(ExclusionDate.year.in_({b.year for b in blocks})))
         excluded_by_year = {}
         for x in ex_res.scalars().all():
-            excluded_by_year.setdefault(x.year, set()).add(x.date)
+            excluded_by_year.setdefault(x.year, set()).add(x.exclusion_date)
 
         created = 0
         skipped_existing = 0
