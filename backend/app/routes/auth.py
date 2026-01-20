@@ -165,7 +165,7 @@ class AuthController(Controller):
             return host
 
         cookie_domain = _cookie_domain(frontend_host)
-        cookie_secure = parsed.scheme == "https"
+        cookie_secure = True if cookie_domain else parsed.scheme == "https"
 
         response.set_cookie(
             CARE_GIVER_SESSION_COOKIE,
