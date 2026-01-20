@@ -48,60 +48,46 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 </Layout>
 
 <script is:inline define:vars={{ returnTo }}>
-	// Wait for DOM to be ready
-	function initMagicLink() {
-		const form = document.getElementById('magic-link-form');
-		const emailInput = document.getElementById('email');
-		const submitBtn = document.getElementById('submit-btn');
-		const errorMsg = document.getElementById('error-message');
-		const successMsg = document.getElementById('success-message');
+	const form = document.getElementById('magic-link-form');
+	const emailInput = document.getElementById('email');
+	const submitBtn = document.getElementById('submit-btn');
+	const errorMsg = document.getElementById('error-message');
+	const successMsg = document.getElementById('success-message');
 
-		if (!form) {
-			console.error('Magic link form not found');
-			return;
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		
+		const email = emailInput?.value?.trim();
+		if (!email) return;
+
+		// Disable form
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Sending...';
+		errorMsg.classList.add('hidden');
+		successMsg.classList.add('hidden');
+
+		try {
+			const response = await fetch('https://sessions-api.tuhuratech.org.nz/api/v1/auth/magic-link', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, return_to: returnTo }),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to send magic link');
+			}
+
+			// Show success
+			successMsg.textContent = `Check your email! We've sent a magic link to ${email}`;
+			successMsg.classList.remove('hidden');
+			form.reset();
+
+		} catch (error) {
+			errorMsg.textContent = 'Something went wrong. Please try again.';
+			errorMsg.classList.remove('hidden');
+		} finally {
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Send magic link';
 		}
-
-		form.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			console.log('Form submitted');
-			
-			const email = emailInput?.value?.trim();
-			if (!email) {
-				console.log('No email provided');
-				return;
-			}
-
-			// Disable form
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Sending...';
-			errorMsg.classList.add('hidden');
-			successMsg.classList.add('hidden');
-			
-			try {
-				// Import the function dynamically
-				const { requestMagicLink } = await import('../../lib/api.ts');
-				await requestMagicLink(email, returnTo);
-
-				// Show success
-				successMsg.textContent = `Check your email! We've sent a magic link to ${email}`;
-				successMsg.classList.remove('hidden');
-				form.reset();
-
-			} catch (error) {
-				console.error('Magic link error:', error);
-				errorMsg.textContent = 'Something went wrong. Please try again.';
-				errorMsg.classList.remove('hidden');
-			} finally {
-				submitBtn.disabled = false;
-				submitBtn.textContent = 'Send magic link';
-			}
-		});
-	}
-
-	// Initialize when DOM is ready
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initMagicLink);
-	} else {
-		initMagicLink();
-	}
+	});
 </script>
