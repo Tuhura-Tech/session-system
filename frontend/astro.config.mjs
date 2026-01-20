@@ -7,7 +7,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	output: 'server',
 	adapter: node({ mode: 'standalone' }),
-	// site: 'https://sessions.tuhuratech.org.nz',
+	site: 'https://sessions.tuhuratech.org.nz',
 	integrations: [sitemap()],
 
 	image: {
