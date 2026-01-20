@@ -173,7 +173,7 @@ if (!user) {
 
 <script is:inline>
 	const sessionId = new URLSearchParams(window.location.search).get('session');
-	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://localhost:8000';
+	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://sessions-api.tuhuratech.org.nz';
 	
 	async function createAuthenticatedSignup(sessionId, input) {
 		const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
