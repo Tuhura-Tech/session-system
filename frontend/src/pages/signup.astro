@@ -143,7 +143,7 @@ if (!user) {
 
 								<!-- Submit -->
 								<div class="flex gap-3">
-									<button type="submit" id="submit-btn" class="btn btn-primary flex-1">
+									<button type="button" id="submit-btn" class="btn btn-primary flex-1">
 										Complete signup
 									</button>
 									<a href={`/sessions/${sessionId}`} class="btn btn-secondary flex-1 text-center">
@@ -190,9 +190,10 @@ if (!user) {
 	const submitBtn = document.getElementById('submit-btn');
 	const errorMsg = document.getElementById('error-message');
 
-	if (form) {
-		form.addEventListener('submit', async (e) => {
+	if (form && submitBtn) {
+		submitBtn.addEventListener('click', async (e) => {
 			e.preventDefault();
+			e.stopPropagation();
 			
 			const formData = new FormData(form);
 			const childId = formData.get('childId');
