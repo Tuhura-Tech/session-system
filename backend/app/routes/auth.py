@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from litestar import Controller, Request, get, post
 from litestar.di import Provide
@@ -149,12 +149,18 @@ class AuthController(Controller):
         # Redirect back to the frontend.
         location = f"{settings.frontend_base_url}{safe_return_to}"
         response = Response(content=None, status_code=302, headers={"Location": location})
+
+        parsed = urlparse(settings.frontend_base_url)
+        frontend_host = parsed.hostname or "localhost"
+        cookie_domain = frontend_host if frontend_host not in {"localhost", "127.0.0.1"} else None
+        cookie_secure = parsed.scheme == "https"
+
         response.set_cookie(
             CARE_GIVER_SESSION_COOKIE,
             raw_session_token,
-            domain="localhost",
+            domain=cookie_domain,
             httponly=True,
-            secure=False,
+            secure=cookie_secure,
             samesite="lax",
             path="/",
         )
