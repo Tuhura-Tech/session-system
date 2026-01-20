@@ -47,7 +47,9 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 	</main>
 </Layout>
 
-<script is:inline define:vars={{ returnTo }}>
+<script define:vars={{ returnTo }}>
+	import { requestMagicLink } from '../../lib/api';
+
 	const form = document.getElementById('magic-link-form');
 	const emailInput = document.getElementById('email');
 	const submitBtn = document.getElementById('submit-btn');
@@ -65,20 +67,9 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 		submitBtn.textContent = 'Sending...';
 		errorMsg.classList.add('hidden');
 		successMsg.classList.add('hidden');
-
-		// Get API base URL from environment
-		const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://localhost:8000';
 		
 		try {
-			const response = await fetch(`${API_BASE_URL}/api/v1/auth/magic-link`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, return_to: returnTo }),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to send magic link');
-			}
+			await requestMagicLink(email, returnTo);
 
 			// Show success
 			successMsg.textContent = `Check your email! We've sent a magic link to ${email}`;
@@ -86,6 +77,7 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 			form.reset();
 
 		} catch (error) {
+			console.error('Magic link error:', error);
 			errorMsg.textContent = 'Something went wrong. Please try again.';
 			errorMsg.classList.remove('hidden');
 		} finally {
