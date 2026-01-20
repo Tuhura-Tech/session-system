@@ -143,7 +143,7 @@ if (!user) {
 
 								<!-- Submit -->
 								<div class="flex gap-3">
-									<button type="button" id="submit-btn" class="btn btn-primary flex-1">
+									<button type="submit" id="submit-btn" class="btn btn-primary flex-1">
 										Complete signup
 									</button>
 									<a href={`/sessions/${sessionId}`} class="btn btn-secondary flex-1 text-center">
@@ -174,60 +174,48 @@ if (!user) {
 <script is:inline>
 	const sessionId = new URLSearchParams(window.location.search).get('session');
 	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://sessions-api.tuhuratech.org.nz';
-	
-	async function createAuthenticatedSignup(sessionId, input) {
-		const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
-			method: 'POST',
-			credentials: 'include',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(input),
-		});
-		if (!res.ok) throw new Error(`Failed to create signup: ${res.status}`);
-		return (await res.json());
-	}
 
 	const form = document.getElementById('signup-form');
 	const submitBtn = document.getElementById('submit-btn');
 	const errorMsg = document.getElementById('error-message');
 
-	if (form && submitBtn) {
-		submitBtn.addEventListener('click', async (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			
-			const formData = new FormData(form);
-			const childId = formData.get('childId');
-			
-			if (!childId) {
-				errorMsg.textContent = 'Please select a child';
-				errorMsg.classList.remove('hidden');
-				return;
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+
+		const formData = new FormData(form);
+		const childId = formData.get('childId');
+
+		if (!childId) {
+			errorMsg.textContent = 'Please select a child';
+			errorMsg.classList.remove('hidden');
+			return;
+		}
+
+		// Disable form
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Submitting...';
+		errorMsg.classList.add('hidden');
+
+		try {
+			const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ childId }),
+			});
+
+			if (!res.ok) {
+				throw new Error(`Failed to create signup: ${res.status}`);
 			}
 
-			// Disable form
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Submitting...';
-			errorMsg.classList.add('hidden');
-
-			try {
-				console.log('[Signup] Submitting form with childId:', childId);
-
-				await createAuthenticatedSignup(sessionId, {
-					childId: childId,
-				});
-
-				console.log('[Signup] Form submission successful, redirecting...');
-				// Success! Redirect to account page
-				window.location.href = '/account?signup=success';
-
-			} catch (error) {
-				console.error('[Signup] Error:', error);
-				errorMsg.textContent = 'Failed to complete signup. Please try again.';
-				errorMsg.classList.remove('hidden');
-				submitBtn.disabled = false;
-				submitBtn.textContent = 'Complete signup';
-			}
-		});
-	}
+			// Success! Redirect to account page
+			window.location.href = '/account?signup=success';
+		} catch (error) {
+			errorMsg.textContent = 'Failed to complete signup. Please try again.';
+			errorMsg.classList.remove('hidden');
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Complete signup';
+		}
+	});
 </script>
 
