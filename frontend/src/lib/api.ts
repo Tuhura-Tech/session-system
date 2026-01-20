@@ -101,12 +101,17 @@ export type UiSessionLocation = {
 };
 
 const defaultApiBaseUrl = 'http://localhost:8000';
+const internalApiBaseUrl = 'http://backend:8000';  // Internal Docker network URL
 
 export function getApiBaseUrl(): string {
-	// Use PUBLIC_BASE_URL from environment, fall back to default
-	const envUrl = typeof process !== 'undefined' && process.env?.PUBLIC_BASE_URL 
-		? process.env.PUBLIC_BASE_URL 
-		: import.meta.env?.PUBLIC_BASE_URL;
+	// For server-side rendering, use internal Docker URL
+	// This check works in Astro because process is only available on the server
+	if (typeof process !== 'undefined' && typeof window === 'undefined') {
+		return internalApiBaseUrl;
+	}
+	
+	// For client-side, use the public API URL from environment
+	const envUrl = import.meta.env?.PUBLIC_BASE_URL;
 	return envUrl || defaultApiBaseUrl;
 }
 
