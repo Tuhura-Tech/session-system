@@ -175,47 +175,57 @@ if (!user) {
 	const sessionId = new URLSearchParams(window.location.search).get('session');
 	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://sessions-api.tuhuratech.org.nz';
 
-	const form = document.getElementById('signup-form');
-	const submitBtn = document.getElementById('submit-btn');
-	const errorMsg = document.getElementById('error-message');
+	const initSignupForm = () => {
+		const form = document.getElementById('signup-form');
+		const submitBtn = document.getElementById('submit-btn');
+		const errorMsg = document.getElementById('error-message');
 
-	form?.addEventListener('submit', async (e) => {
-		e.preventDefault();
+		if (!form || !submitBtn || !errorMsg) return;
 
-		const formData = new FormData(form);
-		const childId = formData.get('childId');
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
 
-		if (!childId) {
-			errorMsg.textContent = 'Please select a child';
-			errorMsg.classList.remove('hidden');
-			return;
-		}
+			const formData = new FormData(form);
+			const childId = formData.get('childId');
 
-		// Disable form
-		submitBtn.disabled = true;
-		submitBtn.textContent = 'Submitting...';
-		errorMsg.classList.add('hidden');
-
-		try {
-			const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
-				method: 'POST',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ childId }),
-			});
-
-			if (!res.ok) {
-				throw new Error(`Failed to create signup: ${res.status}`);
+			if (!childId) {
+				errorMsg.textContent = 'Please select a child';
+				errorMsg.classList.remove('hidden');
+				return;
 			}
 
-			// Success! Redirect to account page
-			window.location.href = '/account?signup=success';
-		} catch (error) {
-			errorMsg.textContent = 'Failed to complete signup. Please try again.';
-			errorMsg.classList.remove('hidden');
-			submitBtn.disabled = false;
-			submitBtn.textContent = 'Complete signup';
-		}
-	});
+			// Disable form
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Submitting...';
+			errorMsg.classList.add('hidden');
+
+			try {
+				const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ childId }),
+				});
+
+				if (!res.ok) {
+					throw new Error(`Failed to create signup: ${res.status}`);
+				}
+
+				// Success! Redirect to account page
+				window.location.href = '/account?signup=success';
+			} catch (error) {
+				errorMsg.textContent = 'Failed to complete signup. Please try again.';
+				errorMsg.classList.remove('hidden');
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Complete signup';
+			}
+		});
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initSignupForm);
+	} else {
+		initSignupForm();
+	}
 </script>
 
