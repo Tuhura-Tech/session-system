@@ -90,19 +90,33 @@ if (session?.occurrences_by_block) {
 }
 
 function formatOccurrenceRange(startsAt: string, endsAt: string): string {
-	const start = new Date(startsAt);
-	const end = new Date(endsAt);
-	const dateFmt = new Intl.DateTimeFormat('en-NZ', {
+	// Parse ISO datetime without timezone conversion (assume NZST)
+	// Format: 2026-02-09T15:30:00+13:00 or similar
+	const startDate = new Date(startsAt);
+	const endDate = new Date(endsAt);
+	
+	// Extract the date and time components in NZST timezone
+	// Note: We use toLocaleString to format in NZST without converting from UTC
+	const dateStr = startDate.toLocaleDateString('en-NZ', {
 		weekday: 'short',
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
 	});
-	const timeFmt = new Intl.DateTimeFormat('en-NZ', {
+	const startTimeStr = startDate.toLocaleTimeString('en-NZ', {
 		hour: 'numeric',
 		minute: '2-digit',
+		hour12: true,
+		timeZone: 'Pacific/Auckland',
 	});
-	return `${dateFmt.format(start)} • ${timeFmt.format(start)}–${timeFmt.format(end)}`;
+	const endTimeStr = endDate.toLocaleTimeString('en-NZ', {
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: true,
+		timeZone: 'Pacific/Auckland',
+	});
+	
+	return `${dateStr} • ${startTimeStr}–${endTimeStr}`;
 }
 ---
 
