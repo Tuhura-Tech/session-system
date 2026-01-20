@@ -152,7 +152,19 @@ class AuthController(Controller):
 
         parsed = urlparse(settings.frontend_base_url)
         frontend_host = parsed.hostname or "localhost"
-        cookie_domain = frontend_host if frontend_host not in {"localhost", "127.0.0.1"} else None
+
+        etld_min_parts = 2
+
+        def _cookie_domain(host: str) -> str | None:
+            if host in {"localhost", "127.0.0.1"}:
+                return None
+            parts = host.split(".")
+            if len(parts) >= etld_min_parts:
+                # Use eTLD+1 style domain so cookie is valid on both api and frontend
+                return "." + ".".join(parts[-2:])
+            return host
+
+        cookie_domain = _cookie_domain(frontend_host)
         cookie_secure = parsed.scheme == "https"
 
         response.set_cookie(
@@ -161,7 +173,7 @@ class AuthController(Controller):
             domain=cookie_domain,
             httponly=True,
             secure=cookie_secure,
-            samesite="lax",
+            samesite="none" if cookie_domain else "lax",
             path="/",
         )
 
