@@ -1,8 +1,10 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     # Database
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/sessions"
@@ -17,18 +19,17 @@ class Settings(BaseSettings):
     # Controls whether SQL statements are echoed to logs.
     # Keep this separate from `debug` to avoid noisy logs in dev/compose.
     sqlalchemy_echo: bool = False
-    cors_origins: list[str] = [
-        "http://localhost:4321",
-        "http://localhost:4324",
-        "http://localhost:3001",
-        "http://localhost:8000",
-        "http://localhost:4173",  # Astro preview
-        "https://sessions.tuhuratech.org.nz",
-        "https://sessions-admin.tuhuratech.org.nz",
-    ]
+    cors_origins: str = "http://localhost:4321,http://localhost:4324,http://localhost:3001,http://localhost:8000,http://localhost:4173,https://sessions.tuhuratech.org.nz,https://sessions-admin.tuhuratech.org.nz"
     public_base_url: str = "http://localhost:8000"
     frontend_base_url: str = "http://localhost:4324"
     admin_base_url: str = "http://localhost:3001"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS origins from comma-separated string."""
+        if self.cors_origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     # Auth (caregiver magic link)
     auth_secret: str = "dev-secret-change-me"

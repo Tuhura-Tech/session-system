@@ -58,7 +58,7 @@ async def lifespan(app: Litestar) -> AsyncGenerator[None, None]:
 
 
 cors_config = CORSConfig(
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.cors_origins_list,
     allow_headers=["*"],
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_credentials=True,
