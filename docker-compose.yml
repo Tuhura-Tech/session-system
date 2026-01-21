@@ -72,7 +72,7 @@ services:
 
 
   frontend:
-    image: ghcr.io/tuhura-tech/session-system/frontend:main@sha256:330f9159455290f22bc070c52fc9faabfaa4e6a1e472906e477b11bba77a8145
+    image: ghcr.io/tuhura-tech/session-system/frontend:main@sha256:89b4e1a19e3eb91726519fa16ae695fd0c4a956eb64581d3407a6918a3da9826
     environment:
       PUBLIC_API_BASE_URL: http://backend:8000
     networks:
