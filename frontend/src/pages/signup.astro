@@ -40,7 +40,7 @@ if (!user) {
 		<div class="container-custom">
 			<div class="mx-auto max-w-2xl">
 				{session ? (
-					<>
+<>
 						<h1 class="text-3xl font-bold text-gray-900">Sign up for {session.name}</h1>
 						
 						<!-- Session Details -->
@@ -52,7 +52,26 @@ if (!user) {
 									<p class="mt-1 text-gray-700">{session.venueName || session.location}</p>
 									{session.address && <p class="text-sm text-gray-600">{session.address}</p>}
 								</div>
+
+								{session.term_summary && (
+									<div>
 										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Term</h3>
+										<p class="mt-1 text-gray-900">{session.term_summary}</p>
+									</div>
+								)}
+
+								{session.age && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Age Group</h3>
+										<p class="mt-1 text-gray-900">{session.age}</p>
+									</div>
+								)}
+
+								{session.what_to_bring && (
+									<div>
+										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">What to Bring</h3>
+										<p class="mt-1 text-gray-900">{session.what_to_bring}</p>
+									</div>
 								)}
 
 								{session.public_instructions && (
@@ -80,39 +99,37 @@ if (!user) {
 									<div class="rounded-lg bg-amber-50 border border-amber-200 p-3">
 										<p class="text-sm font-semibold text-amber-900">⏳ This session is currently waitlisted</p>
 										<p class="mt-1 text-sm text-amber-700">You'll be notified if a spot becomes available.</p>
-									</div>
-								)}
-							</div>
-						</div>
+</div>
+)}
+</div>
+</div>
 
-						{children.length === 0 ? (
-							<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-								<h2 class="text-xl font-semibold text-gray-900">Add a child first</h2>
-								<p class="mt-2 text-gray-600">
-									You need to add at least one child to your account before you can sign up for sessions.
-								</p>
-								<a href="/account" class="btn btn-primary mt-6">
-									Go to account settings
-								</a>
-							</div>
-						) : (
-							<SignupForm sessionId={sessionId} children={children} />
-						)}
-					</>
-				) : (
-					<div>
-						<h1 class="text-3xl font-bold text-gray-900">Session not found</h1>
-						<p class="mt-2 text-gray-600">
-							The session you're looking for doesn't exist.
-						</p>
-						<a href="/" class="btn btn-primary mt-6">
-							Back to sessions
-						</a>
-					</div>
-				)}
-			</div>
-		</div>
-	</main>
+{children.length === 0 ? (
+<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+<h2 class="text-xl font-semibold text-gray-900">Add a child first</h2>
+<p class="mt-2 text-gray-600">
+You need to add at least one child to your account before you can sign up for sessions.
+</p>
+<a href="/account" class="btn btn-primary mt-6">
+Go to account settings
+</a>
+</div>
+) : (
+<SignupForm sessionId={sessionId} children={children} />
+)}
+</>
+) : (
+<div>
+<h1 class="text-3xl font-bold text-gray-900">Session not found</h1>
+<p class="mt-2 text-gray-600">
+The session you're looking for doesn't exist.
+</p>
+<a href="/" class="btn btn-primary mt-6">
+Back to sessions
+</a>
+</div>
+)}
+</div>
+</div>
+</main>
 </Layout>
-
-
