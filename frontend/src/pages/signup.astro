@@ -1,3 +1,4 @@
+import SignupForm from '../components/SignupForm.astro';
 ---
 import Layout from '../layouts/Layout.astro';
 import { fetchMe, fetchSessionById, listChildren } from '../lib/api';
@@ -51,23 +52,26 @@ if (!user) {
 									<p class="mt-1 text-gray-700">{session.venueName || session.location}</p>
 									{session.address && <p class="text-sm text-gray-600">{session.address}</p>}
 								</div>
-
-								{session.term_summary && (
-									<div>
 										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Term</h3>
-										<p class="mt-1 text-gray-900">{session.term_summary}</p>
-									</div>
 								)}
+								// Check if user is logged in
+								const cookieHeader = Astro.request.headers.get('cookie') ?? undefined;
+								let user = null;
+								let children: Array<{id: string; name: string; dateOfBirth?: string | null}> = [];
 
-								{session.age && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Age Group</h3>
-										<p class="mt-1 text-gray-900">{session.age}</p>
-									</div>
-								)}
+								try {
+									user = await fetchMe(cookieHeader);
+									if (user) {
+										children = await listChildren(cookieHeader);
+									}
+								} catch (e) {
+									// Not logged in, redirect to login with return URL
+									return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+								}
 
-								{session.what_to_bring && (
-									<div>
+								if (!user) {
+									return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+								}
 										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">What to Bring</h3>
 										<p class="mt-1 text-gray-900">{session.what_to_bring}</p>
 									</div>
@@ -114,63 +118,7 @@ if (!user) {
 								</a>
 							</div>
 						) : (
-							<form id="signup-form" class="mt-8 space-y-6">
-								<!-- Success Message -->
-								<div id="success-message" class="hidden rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-									<p class="text-emerald-800 font-semibold">✓ Signup successful!</p>
-									<p class="mt-1 text-sm text-emerald-700">
-										Your child has been registered for the session. You'll receive a confirmation email shortly.
-									</p>
-									<a href="/account" class="btn btn-primary mt-4">
-										Back to account
-									</a>
-								</div>
-
-								<!-- Form Content (hidden after success) -->
-								<div id="form-content" class="space-y-6">
-									<!-- Child Selection -->
-									<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-										<h2 class="text-xl font-semibold text-gray-900">Select child</h2>
-										<div class="mt-4 space-y-3">
-											{children.map((child) => (
-												<label class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-													<input
-														type="radio"
-														name="childId"
-														value={child.id}
-														required
-														class="h-4 w-4 text-tuhura-green focus:ring-tuhura-green"
-													/>
-													<div class="flex-1">
-														<p class="font-semibold text-gray-900">{child.name}</p>
-														{child.dateOfBirth && (
-															<p class="text-sm text-gray-600">
-																Born: {new Date(child.dateOfBirth).toLocaleDateString('en-NZ')}
-															</p>
-														)}
-													</div>
-												</label>
-											))}
-										</div>
-									</div>
-
-									<!-- Error Message -->
-									<div id="error-message" class="hidden rounded-lg border border-red-200 bg-red-50 p-4">
-										<p class="text-red-800 font-semibold">Error</p>
-										<p id="error-text" class="mt-1 text-sm text-red-700"></p>
-									</div>
-
-									<!-- Submit -->
-									<div class="flex gap-3">
-										<button type="submit" id="submit-btn" class="btn btn-primary flex-1">
-											Complete signup
-										</button>
-										<a href={`/sessions/${sessionId}`} class="btn btn-secondary flex-1 text-center">
-											Cancel
-										</a>
-									</div>
-								</div>
-							</form>
+							<SignupForm sessionId={sessionId} children={children} />
 						)}
 					</>
 				) : (
@@ -189,72 +137,4 @@ if (!user) {
 	</main>
 </Layout>
 
-<script is:inline>
-	const sessionId = new URLSearchParams(window.location.search).get('session');
-	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://sessions-api.tuhuratech.org.nz';
-	let formInitialized = false;
-
-	const initSignupForm = () => {
-		if (formInitialized) return;
-
-		const form = document.getElementById('signup-form');
-		const submitBtn = document.getElementById('submit-btn');
-		const errorMsg = document.getElementById('error-message');
-		const errorText = document.getElementById('error-text');
-		const successMsg = document.getElementById('success-message');
-		const formContent = document.getElementById('form-content');
-
-		if (!form || !submitBtn || !errorMsg || !successMsg || !formContent) return;
-		formInitialized = true;
-
-		form.addEventListener('submit', async (e) => {
-			e.preventDefault();
-
-			const formData = new FormData(form);
-			const childId = formData.get('childId');
-
-			if (!childId) {
-				errorText.textContent = 'Please select a child';
-				errorMsg.classList.remove('hidden');
-				return;
-			}
-
-			// Disable form
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Submitting...';
-			errorMsg.classList.add('hidden');
-
-			try {
-				const res = await fetch(`${API_BASE_URL}/api/v1/session/${sessionId}/signup`, {
-					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ childId }),
-				});
-
-				if (!res.ok) {
-					throw new Error(`Failed to create signup: ${res.status}`);
-				}
-
-				// Success! Show success message without redirecting
-				formContent.classList.add('hidden');
-				successMsg.classList.remove('hidden');
-			} catch (error) {
-				errorText.textContent = error instanceof Error ? error.message : 'Failed to complete signup. Please try again.';
-				errorMsg.classList.remove('hidden');
-				submitBtn.disabled = false;
-				submitBtn.textContent = 'Complete signup';
-			}
-		});
-	};
-
-	const ready = () => initSignupForm();
-	document.addEventListener('DOMContentLoaded', ready);
-	document.addEventListener('astro:page-load', ready);
-	document.addEventListener('astro:after-swap', () => {
-		formInitialized = false; // re-bind after view transition
-		ready();
-	});
-	ready();
-</script>
 
