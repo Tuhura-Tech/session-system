@@ -53,7 +53,7 @@ services:
 
 
   admin-portal:
-    image: ghcr.io/tuhura-tech/session-system/admin-portal:main@sha256:236da938f867d2e54b21e84c02707902ec24adc4dd6f3903ad197aaeb304ef2a
+    image: ghcr.io/tuhura-tech/session-system/admin-portal:main@sha256:0daf048921b58a9c77f0bb562397cddbd07c7e8e8b0cee7f53ba6d0cde2647fb
     depends_on:
       - backend
     restart: unless-stopped
