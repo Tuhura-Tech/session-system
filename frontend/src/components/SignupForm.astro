@@ -1,13 +1,13 @@
 ---
 interface Props {
   sessionId: string;
-  children: Array<{id: string; name: string; dateOfBirth?: string | null}>;
+  children;
 }
 
 const { sessionId, children } = Astro.props;
 ---
 
-<form id="signup-form" method="POST" class="mt-8 space-y-6">
+<form id="signup-form" class="mt-8 space-y-6">
 	<!-- Success Message -->
 	<div id="success-message" class="hidden rounded-lg border border-emerald-200 bg-emerald-50 p-4">
 		<p class="text-emerald-800 font-semibold">✓ Signup successful!</p>
@@ -65,7 +65,7 @@ const { sessionId, children } = Astro.props;
 	</div>
 </form>
 
-<script define:vars={{ sessionId }}>
+<!-- <script define:vars={{ sessionId }} is:inline>
 	const API_BASE_URL = import.meta.env.PUBLIC_BASE_URL || 'http://sessions-api.tuhuratech.org.nz';
 
 	const form = document.getElementById('signup-form');
@@ -116,4 +116,52 @@ const { sessionId, children } = Astro.props;
 			}
 		});
 	}
+</script> -->
+
+<script define:vars={{ sessionId }} is:inline>
+	const form = document.getElementById('signup-form');
+	const submitBtn = document.getElementById('submit-btn');
+	const errorMsg = document.getElementById('error-message');
+	const errorText = document.getElementById('error-text');
+	const successMsg = document.getElementById('success-message');
+	const formContent = document.getElementById('form-content');
+
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		
+		const formData = new FormData(form);
+        const childId = formData.get('childId');
+
+        if (!childId) {
+            errorText.textContent = 'Please select a child';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        // Disable form
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...'
+
+		try {
+            const res = await fetch(`https://sessions-api.tuhuratech.org.nz/api/v1/session/${sessionId}/signup`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ childId }),
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to create signup: ${res.status}`);
+            }
+
+            // Success! Show success message without redirecting
+            formContent.classList.add('hidden');
+            successMsg.classList.remove('hidden');
+        } catch (error) {
+            errorText.textContent = error instanceof Error ? error.message : 'Failed to complete signup. Please try again.';
+            errorMsg.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Complete signup';
+        }
+	});
 </script>
