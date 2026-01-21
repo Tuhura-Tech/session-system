@@ -29,7 +29,7 @@ services:
       - sessions
 
   backend:
-    image: ghcr.io/tuhura-tech/session-system/backend:main@sha256:4807089e78f4188fa8d825f5b8b8bc3c6d064d757ba08d4c9a610bdb8a724081
+    image: ghcr.io/tuhura-tech/session-system/backend:main@sha256:cb68aa9a4e3e11c760770725d464a2c76710f46915ddfea0264a641b89a1e537
     env_file:
       - .env
     depends_on:
