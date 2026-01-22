@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from alembic import op
 
-from app.models import Base
-
 # revision identifiers, used by Alembic.
 revision = "0002_initial_views"
 down_revision = "0001_block_baseline"
@@ -19,10 +17,8 @@ depends_on = None
 
 def upgrade() -> None:
     """Create all tables defined in SQLAlchemy models."""
-    bind = op.get_bind()
-
     op.execute("""
-        CREATE VIEW children_staff AS
+        CREATE OR REPLACE VIEW children_staff AS
         SELECT
             c.id,
             c.caregiver_id,
@@ -36,7 +32,7 @@ def upgrade() -> None:
     """)
 
     op.execute("""
-        CREATE VIEW caregivers_staff AS
+        CREATE OR REPLACE VIEW caregivers_staff AS
         SELECT
             cg.id,
             cg.name,
@@ -49,5 +45,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Drop all tables defined in SQLAlchemy models."""
-    bind = op.get_bind()
-    Base.metadata.drop_all(bind)
+    op.execute("DROP VIEW IF EXISTS caregivers_staff")
+    op.execute("DROP VIEW IF EXISTS children_staff")

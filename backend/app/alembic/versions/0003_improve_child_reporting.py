@@ -7,9 +7,7 @@ from the current SQLAlchemy models in one step.
 from __future__ import annotations
 
 from alembic import op
-from sqlalchemy import Column, String
-
-from app.models import Base
+from sqlalchemy import Column, String, inspect
 
 # revision identifiers, used by Alembic.
 revision = "0003_improve_child_reporting"
@@ -21,15 +19,18 @@ depends_on = None
 def upgrade() -> None:
     """Create all tables defined in SQLAlchemy models."""
     bind = op.get_bind()
+    inspector = inspect(bind)
+    existing_columns = {column["name"] for column in inspector.get_columns("children")}
 
-    # Add gender field to children table
-    op.add_column("children", Column("gender", String(100), nullable=True))
+    if "gender" not in existing_columns:
+        op.add_column("children", Column("gender", String(100), nullable=True))
 
 
 def downgrade() -> None:
     """Drop all tables defined in SQLAlchemy models."""
     bind = op.get_bind()
-    Base.metadata.drop_all(bind)
+    inspector = inspect(bind)
+    existing_columns = {column["name"] for column in inspector.get_columns("children")}
 
-    # Remove gender field from children table
-    op.drop_column("children", "gender")
+    if "gender" in existing_columns:
+        op.drop_column("children", "gender")
