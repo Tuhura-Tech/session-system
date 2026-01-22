@@ -285,12 +285,23 @@ const profileIncomplete = !user.name || !user.phone;
 
 								<div>
 									<label for="child-gender" class="block text-sm font-semibold text-gray-700">Gender</label>
-									<input
-										type="text"
+									<select
 										id="child-gender"
 										name="gender"
-										placeholder="e.g., Male, Female"
 										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									>
+										<option value="" selected disabled>Select gender</option>
+										<option value="male">Male</option>
+										<option value="female">Female</option>
+										<option value="other">Other</option>
+									</select>
+
+									<input
+										type="text"
+										id="child-gender-other"
+										name="genderOther"
+										placeholder="Please specify"
+										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20 hidden"
 									/>
 								</div>
 
@@ -329,6 +340,20 @@ const profileIncomplete = !user.name || !user.phone;
 	// Profile form
 	const profileForm = document.getElementById('profile-form') as HTMLFormElement;
 	const profileMessage = document.getElementById('profile-message');
+
+	// unhide input box for gender if "other" is selected
+	const genderSelect = document.getElementById('child-gender') as HTMLSelectElement;
+	const genderOtherInput = document.getElementById('child-gender-other') as HTMLInputElement;
+	genderSelect?.addEventListener('change', () => {
+		if (genderSelect.value === 'other') {
+			genderOtherInput.classList.remove('hidden');
+			genderOtherInput.required = true;
+		} else {
+			genderOtherInput.classList.add('hidden');
+			genderOtherInput.required = false;
+			genderOtherInput.value = '';
+		}
+	});
 
 	profileForm?.addEventListener('submit', async (e) => {
 		e.preventDefault();
