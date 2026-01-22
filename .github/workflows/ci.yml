@@ -87,13 +87,6 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
         run: uv run pytest -v --cov=app --cov-report=xml
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        with:
-          files: ./backend/coverage.xml
-          flags: backend
-          fail_ci_if_error: false
-
   backend-migrations:
     name: Backend Migrations Check
     runs-on: ubuntu-latest
@@ -193,14 +186,6 @@ jobs:
         working-directory: ./admin_portal
         run: pnpm run test
 
-      - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: admin-portal-test-results
-          path: admin_portal/playwright-report/
-          retention-days: 30
-
   admin-portal-build:
     name: Admin Portal Build
     runs-on: ubuntu-latest
@@ -289,14 +274,6 @@ jobs:
       - name: Run e2e tests
         working-directory: ./frontend
         run: pnpm run test:e2e
-
-      - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: frontend-test-results
-          path: frontend/playwright-report/
-          retention-days: 30
 
   frontend-build:
     name: Frontend Build
