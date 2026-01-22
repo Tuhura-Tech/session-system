@@ -1,5 +1,8 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"files": {
+		"ignore": [".astro", "dist", "node_modules"]
+	},
 	"formatter": {
 		"indentStyle": "tab",
 		"indentWidth": 2,
