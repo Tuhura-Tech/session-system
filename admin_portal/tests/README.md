@@ -33,6 +33,7 @@ pnpm test:ui
 ```
 
 This opens an interactive test explorer where you can:
+
 - See all tests organized by spec
 - Run individual tests
 - Watch tests execute in real-time
@@ -90,6 +91,7 @@ tests/e2e/
 ## Test Coverage
 
 ### Authentication (`auth.spec.ts`)
+
 - [x] Login page display
 - [x] Login button verification
 - [x] Authenticated redirect to dashboard
@@ -98,6 +100,7 @@ tests/e2e/
 - [x] Failed session handling
 
 ### Dashboard (`dashboard.spec.ts`)
+
 - [x] Dashboard page load
 - [x] Statistics display
 - [x] Navigation links
@@ -105,6 +108,7 @@ tests/e2e/
 - [x] Mobile responsiveness
 
 ### Sessions (`sessions.spec.ts`)
+
 - [x] Sessions list display
 - [x] Search functionality
 - [x] Filter options
@@ -114,6 +118,7 @@ tests/e2e/
 - [x] Mobile responsiveness
 
 ### Attendance (`attendance.spec.ts`)
+
 - [x] Attendance roll display
 - [x] Attendance marking options
 - [x] Status selection
@@ -122,6 +127,7 @@ tests/e2e/
 - [x] Form handling
 
 ### Locations & Terms (`locations-terms.spec.ts`)
+
 - [x] Locations page display
 - [x] Create location button
 - [x] Locations list display
@@ -133,6 +139,7 @@ tests/e2e/
 - [x] Edit term functionality
 
 ### API Integration (`api.spec.ts`)
+
 - [x] Error handling (API failures)
 - [x] 401 unauthorized handling
 - [x] 500 server error handling
@@ -146,6 +153,7 @@ tests/e2e/
 ### Playwright Config
 
 `playwright.config.ts` contains:
+
 - Test directory: `tests/e2e`
 - Base URL: `http://localhost:3001`
 - Browsers: Chromium, Firefox, WebKit
@@ -170,7 +178,7 @@ PLAYWRIGHT_HEADLESS=true
 ### Authentication Mocking
 
 ```typescript
-await mockGoogleOAuthSession(page)
+await mockGoogleOAuthSession(page);
 ```
 
 Sets a valid session cookie for authenticated tests.
@@ -179,14 +187,14 @@ Sets a valid session cookie for authenticated tests.
 
 ```typescript
 await page.route('**/api/v1/admin/sessions', async (route) => {
-  await route.continue() // or abort, respond with custom data, etc.
-})
+	await route.continue(); // or abort, respond with custom data, etc.
+});
 ```
 
 ### Waiting for APIs
 
 ```typescript
-await waitForApiCalls(page)
+await waitForApiCalls(page);
 ```
 
 Waits for all network requests to complete.
@@ -194,7 +202,7 @@ Waits for all network requests to complete.
 ### Navigation
 
 ```typescript
-await navigateTo(page, '/dashboard')
+await navigateTo(page, '/dashboard');
 ```
 
 Navigates and waits for page load.
@@ -202,6 +210,7 @@ Navigates and waits for page load.
 ## Test Data
 
 Tests use:
+
 - Mocked session cookies for authentication
 - Mocked API responses for data
 - No actual backend data is required
@@ -210,6 +219,7 @@ Tests use:
 ## CI/CD Integration
 
 The tests are configured for CI with:
+
 - Automatic browser installation
 - Artifact collection (screenshots, videos, traces)
 - HTML report generation
@@ -230,19 +240,21 @@ Increase timeout in specific tests:
 
 ```typescript
 test('my test', async ({ page }) => {
-  await page.goto('/dashboard', { waitUntil: 'networkidle', timeout: 30000 })
-})
+	await page.goto('/dashboard', { waitUntil: 'networkidle', timeout: 30000 });
+});
 ```
 
 ### Backend not running
 
 Tests expect backend at `http://localhost:8000`. Either:
+
 1. Start backend: `cd ../backend && python main.py`
 2. Or mock all API calls in tests
 
 ### Port already in use
 
 If port 3001 is in use:
+
 1. Kill process: `lsof -ti:3001 | xargs kill -9`
 2. Or configure different port in `playwright.config.ts`
 
@@ -270,6 +282,7 @@ pnpm exec playwright show-report
 ```
 
 Opens interactive HTML report showing:
+
 - Test results
 - Screenshots
 - Videos
@@ -285,21 +298,23 @@ Located in `tests/e2e/test-results/` on failure.
 1. Create new spec file: `tests/e2e/myfeature.spec.ts`
 2. Import test framework and helpers:
    ```typescript
-   import { test, expect } from '@playwright/test'
-   import { mockGoogleOAuthSession, navigateTo } from './helpers'
+   import { test, expect } from '@playwright/test';
+   import { mockGoogleOAuthSession, navigateTo } from './helpers';
    ```
 3. Create test suite and cases:
+
    ```typescript
    test.describe('My Feature', () => {
-     test.beforeEach(async ({ page }) => {
-       await mockGoogleOAuthSession(page)
-     })
-     
-     test('should do something', async ({ page }) => {
-       // Test implementation
-     })
-   })
+   	test.beforeEach(async ({ page }) => {
+   		await mockGoogleOAuthSession(page);
+   	});
+
+   	test('should do something', async ({ page }) => {
+   		// Test implementation
+   	});
+   });
    ```
+
 4. Run: `pnpm test tests/e2e/myfeature.spec.ts`
 
 ## Best Practices
@@ -341,6 +356,7 @@ Located in `tests/e2e/test-results/` on failure.
 ## Support
 
 For issues with tests:
+
 1. Run in debug mode: `pnpm test:debug`
 2. Check HTML report: `pnpm exec playwright show-report`
 3. Review test videos/traces in test results

@@ -1,441 +1,384 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import Sidebar from "../components/Sidebar";
-import Layout from "../components/Layout";
-import { adminApi } from "../services/api";
-import type { Session, SessionLocation } from "../types";
+import { ArrowLeft } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
+import Sidebar from '../components/Sidebar';
+import { adminApi } from '../services/api';
+import type { Session, SessionLocation } from '../types';
 
 const EditSession: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [session, setSession] = useState<Session | null>(null);
-  const [locations, setLocations] = useState<SessionLocation[]>([]);
-  const [blocks, setBlocks] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+	const { id } = useParams<{ id: string }>();
+	const navigate = useNavigate();
+	const [session, setSession] = useState<Session | null>(null);
+	const [locations, setLocations] = useState<SessionLocation[]>([]);
+	const [blocks, setBlocks] = useState<any[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    year: new Date().getFullYear(),
-    sessionLocationId: "",
-    ageLower: "",
-    ageUpper: "",
-    dayOfWeek: "",
-    startTime: "",
-    endTime: "",
-    capacity: "",
-    waitlist: false,
-    whatToBring: "",
-    prerequisites: "",
-    photoAlbumUrl: "",
-    internalNotes: "",
-    sessionType: "term",
-    blockIds: [] as string[],
-  });
+	const [formData, setFormData] = useState({
+		name: '',
+		year: new Date().getFullYear(),
+		sessionLocationId: '',
+		ageLower: '',
+		ageUpper: '',
+		dayOfWeek: '',
+		startTime: '',
+		endTime: '',
+		capacity: '',
+		waitlist: false,
+		whatToBring: '',
+		prerequisites: '',
+		photoAlbumUrl: '',
+		internalNotes: '',
+		sessionType: 'term',
+		blockIds: [] as string[],
+	});
 
-  useEffect(() => {
-    if (id) {
-      loadSessionData(id);
-    }
-  }, [id]);
+	useEffect(() => {
+		if (id) {
+			loadSessionData(id);
+		}
+	}, [id]);
 
-  const loadSessionData = async (sessionId: string) => {
-    try {
-      setIsLoading(true);
-      const [sessionData, locationsData, blocksData] = await Promise.all([
-        adminApi.getSession(sessionId),
-        adminApi.getLocations(),
-        adminApi.getBlocks(),
-      ]);
+	const loadSessionData = async (sessionId: string) => {
+		try {
+			setIsLoading(true);
+			const [sessionData, locationsData, blocksData] = await Promise.all([
+				adminApi.getSession(sessionId),
+				adminApi.getLocations(),
+				adminApi.getBlocks(),
+			]);
 
-      setSession(sessionData);
-      setLocations(locationsData);
-      setBlocks(blocksData);
+			setSession(sessionData);
+			setLocations(locationsData);
+			setBlocks(blocksData);
 
-      setFormData({
-        name: sessionData.name,
-        year: sessionData.year,
-        sessionLocationId: sessionData.sessionLocationId || "",
-        ageLower: sessionData.ageLower?.toString() || "",
-        ageUpper: sessionData.ageUpper?.toString() || "",
-        dayOfWeek: sessionData.dayOfWeek?.toString() || "",
-        startTime: sessionData.startTime || "",
-        endTime: sessionData.endTime || "",
-        capacity: sessionData.capacity?.toString() || "",
-        waitlist: sessionData.waitlist,
-        whatToBring: sessionData.whatToBring || "",
-        prerequisites: sessionData.prerequisites || "",
-        photoAlbumUrl: sessionData.photoAlbumUrl || "",
-        internalNotes: sessionData.internalNotes || "",
-        sessionType: "term",
-        blockIds: sessionData.blockIds || [],
-      });
-    } catch (error) {
-      console.error("Failed to load session data:", error);
-      alert("Failed to load session");
-      navigate("/sessions");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+			setFormData({
+				name: sessionData.name,
+				year: sessionData.year,
+				sessionLocationId: sessionData.sessionLocationId || '',
+				ageLower: sessionData.ageLower?.toString() || '',
+				ageUpper: sessionData.ageUpper?.toString() || '',
+				dayOfWeek: sessionData.dayOfWeek?.toString() || '',
+				startTime: sessionData.startTime || '',
+				endTime: sessionData.endTime || '',
+				capacity: sessionData.capacity?.toString() || '',
+				waitlist: sessionData.waitlist,
+				whatToBring: sessionData.whatToBring || '',
+				prerequisites: sessionData.prerequisites || '',
+				photoAlbumUrl: sessionData.photoAlbumUrl || '',
+				internalNotes: sessionData.internalNotes || '',
+				sessionType: 'term',
+				blockIds: sessionData.blockIds || [],
+			});
+		} catch (error) {
+			console.error('Failed to load session data:', error);
+			alert('Failed to load session');
+			navigate('/sessions');
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!id) return;
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!id) return;
 
-    try {
-      setIsSubmitting(true);
-      const sessionData = {
-        name: formData.name,
-        year: formData.year,
-        sessionLocationId: formData.sessionLocationId || null,
-        ageLower: formData.ageLower ? parseInt(formData.ageLower) : null,
-        ageUpper: formData.ageUpper ? parseInt(formData.ageUpper) : null,
-        dayOfWeek: formData.dayOfWeek ? parseInt(formData.dayOfWeek) : null,
-        startTime: formData.startTime || null,
-        endTime: formData.endTime || null,
-        capacity: formData.capacity ? parseInt(formData.capacity) : null,
-        waitlist: formData.waitlist,
-        whatToBring: formData.whatToBring || null,
-        prerequisites: formData.prerequisites || null,
-        photoAlbumUrl: formData.photoAlbumUrl || null,
-        internalNotes: formData.internalNotes || null,
-        sessionType: formData.sessionType,
-        blockIds: formData.blockIds,
-      };
+		try {
+			setIsSubmitting(true);
+			const sessionData = {
+				name: formData.name,
+				year: formData.year,
+				sessionLocationId: formData.sessionLocationId || null,
+				ageLower: formData.ageLower ? Number.parseInt(formData.ageLower) : null,
+				ageUpper: formData.ageUpper ? Number.parseInt(formData.ageUpper) : null,
+				dayOfWeek: formData.dayOfWeek ? Number.parseInt(formData.dayOfWeek) : null,
+				startTime: formData.startTime || null,
+				endTime: formData.endTime || null,
+				capacity: formData.capacity ? Number.parseInt(formData.capacity) : null,
+				waitlist: formData.waitlist,
+				whatToBring: formData.whatToBring || null,
+				prerequisites: formData.prerequisites || null,
+				photoAlbumUrl: formData.photoAlbumUrl || null,
+				internalNotes: formData.internalNotes || null,
+				sessionType: formData.sessionType,
+				blockIds: formData.blockIds,
+			};
 
-      await adminApi.updateSession(id, sessionData);
-      navigate(`/sessions/${id}`);
-    } catch (error) {
-      console.error("Failed to update session:", error);
-      alert("Failed to update session");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+			await adminApi.updateSession(id, sessionData);
+			navigate(`/sessions/${id}`);
+		} catch (error) {
+			console.error('Failed to update session:', error);
+			alert('Failed to update session');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen">
+				<Sidebar />
+				<div className="flex flex-1 items-center justify-center">
+					<div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+				</div>
+			</div>
+		);
+	}
 
-  if (!session) {
-    return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1">
-          <Layout title="Session Not Found">
-            <p className="text-gray-500">Session not found</p>
-          </Layout>
-        </div>
-      </div>
-    );
-  }
+	if (!session) {
+		return (
+			<div className="flex min-h-screen">
+				<Sidebar />
+				<div className="flex-1">
+					<Layout title="Session Not Found">
+						<p className="text-gray-500">Session not found</p>
+					</Layout>
+				</div>
+			</div>
+		);
+	}
 
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar />
+	return (
+		<div className="flex min-h-screen">
+			<Sidebar />
 
-      <div className="flex-1">
-        <Layout>
-          <button
-            onClick={() => navigate(`/sessions/${id}`)}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Session
-          </button>
+			<div className="flex-1">
+				<Layout>
+					<button
+						onClick={() => navigate(`/sessions/${id}`)}
+						className="mb-6 flex items-center text-gray-600 hover:text-gray-900"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Back to Session
+					</button>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">
-              Edit Session
-            </h1>
+					<div className="rounded-lg bg-white p-6 shadow">
+						<h1 className="mb-6 text-2xl font-bold text-gray-900">Edit Session</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Session Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+						<form onSubmit={handleSubmit} className="space-y-6">
+							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+								<div className="md:col-span-2">
+									<label className="block text-sm font-medium text-gray-700">Session Name *</label>
+									<input
+										type="text"
+										required
+										value={formData.name}
+										onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Year *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.year}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        year: parseInt(e.target.value),
-                      })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Year *</label>
+									<input
+										type="number"
+										required
+										value={formData.year}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												year: Number.parseInt(e.target.value),
+											})
+										}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Session Type *
-                  </label>
-                  <select
-                    required
-                    value={formData.sessionType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sessionType: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  >
-                    <option value="term">Term (Recurring)</option>
-                    <option value="special">Special (One-off)</option>
-                  </select>
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Session Type *</label>
+									<select
+										required
+										value={formData.sessionType}
+										onChange={(e) => setFormData({ ...formData, sessionType: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									>
+										<option value="term">Term (Recurring)</option>
+										<option value="special">Special (One-off)</option>
+									</select>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Location
-                  </label>
-                  <select
-                    value={formData.sessionLocationId}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sessionLocationId: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  >
-                    <option value="">Select a location</option>
-                    {locations.map((loc) => (
-                      <option key={loc.id} value={loc.id}>
-                        {loc.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Location</label>
+									<select
+										value={formData.sessionLocationId}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												sessionLocationId: e.target.value,
+											})
+										}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									>
+										<option value="">Select a location</option>
+										{locations.map((loc) => (
+											<option key={loc.id} value={loc.id}>
+												{loc.name}
+											</option>
+										))}
+									</select>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Day of Week
-                  </label>
-                  <select
-                    value={formData.dayOfWeek}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dayOfWeek: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  >
-                    <option value="">Select a day</option>
-                    {daysOfWeek.map((day, index) => (
-                      <option key={day} value={index}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Day of Week</label>
+									<select
+										value={formData.dayOfWeek}
+										onChange={(e) => setFormData({ ...formData, dayOfWeek: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									>
+										<option value="">Select a day</option>
+										{daysOfWeek.map((day, index) => (
+											<option key={day} value={index}>
+												{day}
+											</option>
+										))}
+									</select>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Start Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startTime: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Start Time</label>
+									<input
+										type="time"
+										value={formData.startTime}
+										onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    End Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.endTime}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endTime: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">End Time</label>
+									<input
+										type="time"
+										value={formData.endTime}
+										onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Age Lower
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.ageLower}
-                    onChange={(e) =>
-                      setFormData({ ...formData, ageLower: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Age Lower</label>
+									<input
+										type="number"
+										value={formData.ageLower}
+										onChange={(e) => setFormData({ ...formData, ageLower: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Age Upper
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.ageUpper}
-                    onChange={(e) =>
-                      setFormData({ ...formData, ageUpper: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Age Upper</label>
+									<input
+										type="number"
+										value={formData.ageUpper}
+										onChange={(e) => setFormData({ ...formData, ageUpper: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Capacity
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.capacity}
-                    onChange={(e) =>
-                      setFormData({ ...formData, capacity: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div>
+									<label className="block text-sm font-medium text-gray-700">Capacity</label>
+									<input
+										type="number"
+										value={formData.capacity}
+										onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.waitlist}
-                    onChange={(e) =>
-                      setFormData({ ...formData, waitlist: e.target.checked })
-                    }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Enable waitlist
-                  </label>
-                </div>
+								<div className="flex items-center">
+									<input
+										type="checkbox"
+										checked={formData.waitlist}
+										onChange={(e) => setFormData({ ...formData, waitlist: e.target.checked })}
+										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+									/>
+									<label className="ml-2 block text-sm text-gray-900">Enable waitlist</label>
+								</div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Associated Blocks (for term sessions)
-                  </label>
-                  <div className="mt-2 space-y-2">
-                    {blocks.map((block) => (
-                      <label key={block.id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.blockIds.includes(block.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData({
-                                ...formData,
-                                blockIds: [...formData.blockIds, block.id],
-                              });
-                            } else {
-                              setFormData({
-                                ...formData,
-                                blockIds: formData.blockIds.filter(
-                                  (id) => id !== block.id,
-                                ),
-                              });
-                            }
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-900">
-                          {block.name} ({block.blockType}) - {block.year}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+								<div className="md:col-span-2">
+									<label className="block text-sm font-medium text-gray-700">
+										Associated Blocks (for term sessions)
+									</label>
+									<div className="mt-2 space-y-2">
+										{blocks.map((block) => (
+											<label key={block.id} className="flex items-center">
+												<input
+													type="checkbox"
+													checked={formData.blockIds.includes(block.id)}
+													onChange={(e) => {
+														if (e.target.checked) {
+															setFormData({
+																...formData,
+																blockIds: [...formData.blockIds, block.id],
+															});
+														} else {
+															setFormData({
+																...formData,
+																blockIds: formData.blockIds.filter((id) => id !== block.id),
+															});
+														}
+													}}
+													className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+												/>
+												<span className="ml-2 text-sm text-gray-900">
+													{block.name} ({block.blockType}) - {block.year}
+												</span>
+											</label>
+										))}
+									</div>
+								</div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    What to Bring
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.whatToBring}
-                    onChange={(e) =>
-                      setFormData({ ...formData, whatToBring: e.target.value })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+								<div className="md:col-span-2">
+									<label className="block text-sm font-medium text-gray-700">What to Bring</label>
+									<textarea
+										rows={3}
+										value={formData.whatToBring}
+										onChange={(e) => setFormData({ ...formData, whatToBring: e.target.value })}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Prerequisites
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.prerequisites}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        prerequisites: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+								<div className="md:col-span-2">
+									<label className="block text-sm font-medium text-gray-700">Prerequisites</label>
+									<textarea
+										rows={3}
+										value={formData.prerequisites}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												prerequisites: e.target.value,
+											})
+										}
+										className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								</div>
+							</div>
 
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/sessions/${id}`)}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Saving..." : "Update Session"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </Layout>
-      </div>
-    </div>
-  );
+							<div className="flex justify-end gap-4">
+								<button
+									type="button"
+									onClick={() => navigate(`/sessions/${id}`)}
+									className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+								>
+									Cancel
+								</button>
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+								>
+									{isSubmitting ? 'Saving...' : 'Update Session'}
+								</button>
+							</div>
+						</form>
+					</div>
+				</Layout>
+			</div>
+		</div>
+	);
 };
 
 export default EditSession;
