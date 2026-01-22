@@ -77,7 +77,7 @@ class PublicController(Controller):
 
             # Attach blocks to sessions
             for session in sessions:
-                session._blocks = blocks_by_session.get(str(session.id), [])
+                session._blocks = blocks_by_session.get(str(session.id), [])  # type: ignore[attr-defined]
 
         grouped: dict[str, list[SessionPublic]] = defaultdict(list)
         for session in sessions:

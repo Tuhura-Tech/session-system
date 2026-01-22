@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { adminApi } from '../services/api';
-import type { Session, Occurrence } from '../types';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { adminApi } from "../services/api";
+import type { Session, Occurrence } from "../types";
 
 export default function SessionCalendar() {
   const { id } = useParams<{ id: string }>();
@@ -10,7 +10,8 @@ export default function SessionCalendar() {
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
-  const [selectedOccurrence, setSelectedOccurrence] = useState<Occurrence | null>(null);
+  const [selectedOccurrence, setSelectedOccurrence] =
+    useState<Occurrence | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -23,7 +24,7 @@ export default function SessionCalendar() {
         setSession(sessionData);
         setOccurrences(occurrencesData);
       } catch (err) {
-        console.error('Failed to load data:', err);
+        console.error("Failed to load data:", err);
       } finally {
         setLoading(false);
       }
@@ -39,24 +40,28 @@ export default function SessionCalendar() {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   const getOccurrencesForDay = (day: number) => {
     const dateStr = formatDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+      new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
     );
     return occurrences.filter((occ) => {
-      const occDate = occ.startsAt.split('T')[0];
+      const occDate = occ.startsAt.split("T")[0];
       return occDate === dateStr;
     });
   };
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
+    );
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
+    );
   };
 
   if (loading) {
@@ -72,9 +77,15 @@ export default function SessionCalendar() {
 
   const daysInMonth = getDaysInMonth(currentDate);
   const firstDay = getFirstDayOfMonth(currentDate);
-  const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const calendarDays: (number | null)[] = [...Array.from({ length: firstDay }, () => null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  const monthName = currentDate.toLocaleString("default", {
+    month: "long",
+    year: "numeric",
+  });
+  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const calendarDays: (number | null)[] = [
+    ...Array.from({ length: firstDay }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -84,7 +95,9 @@ export default function SessionCalendar() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {session?.name} - Calendar
           </h1>
-          <p className="text-gray-600">{occurrences.length} occurrences scheduled</p>
+          <p className="text-gray-600">
+            {occurrences.length} occurrences scheduled
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -127,7 +140,9 @@ export default function SessionCalendar() {
               {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-px bg-gray-200 p-px">
                 {calendarDays.map((day, idx) => {
-                  const dayOccurrences = day ? getOccurrencesForDay(day as number) : [];
+                  const dayOccurrences = day
+                    ? getOccurrencesForDay(day as number)
+                    : [];
                   const isCurrentMonth = day !== null;
                   const isToday =
                     isCurrentMonth &&
@@ -140,15 +155,15 @@ export default function SessionCalendar() {
                       key={idx}
                       className={`min-h-24 p-2 text-sm ${
                         isCurrentMonth
-                          ? `bg-white ${
-                              isToday ? 'ring-2 ring-blue-400' : ''
-                            }`
-                          : 'bg-gray-50'
+                          ? `bg-white ${isToday ? "ring-2 ring-blue-400" : ""}`
+                          : "bg-gray-50"
                       } cursor-pointer hover:bg-blue-50 transition`}
                     >
                       {isCurrentMonth && (
                         <>
-                          <div className={`font-semibold mb-1 ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                          <div
+                            className={`font-semibold mb-1 ${isToday ? "text-blue-600" : "text-gray-900"}`}
+                          >
                             {day}
                           </div>
                           <div className="space-y-1">
@@ -159,8 +174,8 @@ export default function SessionCalendar() {
                                 className="bg-blue-100 text-blue-800 rounded px-1 py-0.5 text-xs truncate hover:bg-blue-200"
                               >
                                 {new Date(occ.startsAt).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
+                                  hour: "2-digit",
+                                  minute: "2-digit",
                                 })}
                               </div>
                             ))}
@@ -189,7 +204,9 @@ export default function SessionCalendar() {
 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Date & Time</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      Date & Time
+                    </p>
                     <p className="text-gray-900 mt-1">
                       {new Date(selectedOccurrence.startsAt).toLocaleString()}
                     </p>
@@ -201,15 +218,19 @@ export default function SessionCalendar() {
                       {selectedOccurrence.cancelled ? (
                         <span className="text-red-600">Cancelled</span>
                       ) : (
-                        'Scheduled'
+                        "Scheduled"
                       )}
                     </p>
                   </div>
 
                   {selectedOccurrence.cancellationReason && (
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Cancellation Reason</p>
-                      <p className="text-gray-900 mt-1">{selectedOccurrence.cancellationReason}</p>
+                      <p className="text-sm font-medium text-gray-500">
+                        Cancellation Reason
+                      </p>
+                      <p className="text-gray-900 mt-1">
+                        {selectedOccurrence.cancellationReason}
+                      </p>
                     </div>
                   )}
                 </div>

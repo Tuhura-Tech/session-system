@@ -149,6 +149,6 @@ app = Litestar(
     openapi_config=openapi_config,
     plugins=[PydanticPlugin(prefer_alias=True)],
     middleware=[DefineMiddleware(RateLimitMiddleware)] + ([otel_config.middleware] if otel_config else []),
-    exception_handlers={NotAuthorizedException: auth_exception_handler},
+    exception_handlers={NotAuthorizedException: auth_exception_handler},  # type: ignore[arg-type]
     debug=settings.debug,
 )

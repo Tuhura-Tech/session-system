@@ -301,7 +301,7 @@ class SessionStaffController(Controller):
             .where(SessionStaff.staff_id == staff_id)
         )
 
-        if result.rowcount == 0:
+        if result.rowcount == 0:  # type: ignore[attr-defined]
             raise NotFoundException(detail="Staff assignment not found")
 
         await db.commit()

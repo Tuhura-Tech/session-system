@@ -105,7 +105,11 @@ function initAll(): void {
 // Watch for when map containers become visible and retry initialization
 function watchMapVisibility(): void {
 	const observer = new MutationObserver(() => {
-		const maps = Array.from(document.querySelectorAll<HTMLElement>('[data-sessions-map="true"][data-map-needs-init="true"]'));
+		const maps = Array.from(
+			document.querySelectorAll<HTMLElement>(
+				'[data-sessions-map="true"][data-map-needs-init="true"]',
+			),
+		);
 		for (const mapEl of maps) {
 			const parent = mapEl.closest('.map-container');
 			if (parent && !parent.classList.contains('hidden')) {
@@ -114,19 +118,23 @@ function watchMapVisibility(): void {
 			}
 		}
 	});
-	
-	observer.observe(document.body, { 
-		attributes: true, 
-		attributeFilter: ['class'], 
-		subtree: true 
+
+	observer.observe(document.body, {
+		attributes: true,
+		attributeFilter: ['class'],
+		subtree: true,
 	});
 }
 
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', () => {
-		initAll();
-		watchMapVisibility();
-	}, { once: true });
+	document.addEventListener(
+		'DOMContentLoaded',
+		() => {
+			initAll();
+			watchMapVisibility();
+		},
+		{ once: true },
+	);
 } else {
 	initAll();
 	watchMapVisibility();

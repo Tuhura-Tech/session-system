@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import UTC
-from typing import TYPE_CHECKING
 
 from httpx_oauth.clients.google import GoogleOAuth2
 from litestar import Controller, Request, get, post

@@ -4,10 +4,11 @@ import csv
 import io
 import logging
 import uuid
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from litestar import Controller, delete as http_delete, get, patch, post
+from litestar import Controller, get, patch, post
+from litestar import delete as http_delete
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException, ValidationException
 from litestar.response import Response
@@ -17,28 +18,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import settings
+
 logger = logging.getLogger(__name__)
+from typing import cast
+
+from app.admin_auth import admin_session_guard
 from app.db import get_db_session
 from app.models.attendance import AttendanceRecord
 from app.models.attendance_audit import AttendanceAuditLog
 from app.models.child_note import ChildNote
 from app.models.exclusion_date import ExclusionDate
-from app.models.session_block import SessionBlock, SessionBlockType
+from app.models.session import DayOfWeekEnum, Session
+from app.models.session_block import SessionBlock
 from app.models.session_block_link import SessionBlockLink
-from app.models.session import Session, DayOfWeekEnum
 from app.models.session_location import SessionLocation
 from app.models.session_occurrence import SessionOccurrence
 from app.models.signup import Signup
 from app.models.views import CaregiverStaffView, ChildStaffView
 from app.schemas.admin import (
     AdminSignupOut,
-    AttendanceStatus,
     AttendanceRecordOut,
     AttendanceRollItem,
     AttendanceRollOut,
+    AttendanceStatus,
     AttendanceUpsert,
     BulkEmailRequest,
-    SessionChangeAlertRequest,
     ChildAdminOut,
     ChildNoteCreate,
     ChildNoteOut,
@@ -51,6 +55,7 @@ from app.schemas.admin import (
     SessionBlockCreate,
     SessionBlockOut,
     SessionBlockUpdate,
+    SessionChangeAlertRequest,
     SessionCreate,
     SessionLocationCreate,
     SessionLocationOut,
@@ -61,10 +66,6 @@ from app.schemas.admin import (
 )
 from app.schemas.session import _format_time_range
 from app.worker import get_queue
-from typing import cast
-
-from app.admin_auth import admin_session_guard
-
 
 TZ = ZoneInfo("Pacific/Auckland")
 
@@ -310,7 +311,7 @@ class AdminController(Controller):
             raise NotFoundException(detail="Exclusion not found")
         x.reason = data.reason
         await db.flush()
-        return ExclusionDateOut(id=str(x.id), year=x.year, date=x.date, reason=x.reason)
+        return ExclusionDateOut(id=str(x.id), year=x.year, date=x.exclusion_date, reason=x.reason)
 
     @http_delete(
         "/exclusions/{exclusion_id:uuid}",
@@ -492,7 +493,7 @@ class AdminController(Controller):
                 id=str(s.id),
                 sessionLocationId=str(s.session_location_id),
                 year=s.year,
-                sessionType=s.session_type,
+                session_type=s.session_type,
                 name=s.name,
                 ageLower=s.age_lower,
                 ageUpper=s.age_upper,
@@ -529,7 +530,7 @@ class AdminController(Controller):
             id=str(s.id),
             sessionLocationId=str(s.session_location_id),
             year=s.year,
-            sessionType=s.session_type,
+            session_type=s.session_type,
             name=s.name,
             ageLower=s.age_lower,
             ageUpper=s.age_upper,
@@ -572,7 +573,7 @@ class AdminController(Controller):
                 id=str(s.id),
                 sessionLocationId=str(s.session_location_id),
                 year=s.year,
-                sessionType=s.session_type,
+                session_type=s.session_type,
                 name=s.name,
                 ageLower=s.age_lower,
                 ageUpper=s.age_upper,
@@ -628,7 +629,7 @@ class AdminController(Controller):
         await db.flush()
 
         return SessionOut(
-            sessionType=s.session_type,
+            session_type=s.session_type,
             id=str(s.id),
             sessionLocationId=str(s.session_location_id),
             year=s.year,
@@ -713,7 +714,7 @@ class AdminController(Controller):
         return SessionOut(
             id=str(s.id),
             sessionLocationId=str(s.session_location_id),
-            sessionType=s.session_type,
+            session_type=s.session_type,
             year=s.year,
             name=s.name,
             ageLower=s.age_lower,
@@ -943,7 +944,7 @@ class AdminController(Controller):
         exclusions_res = await db.execute(exclusions_stmt)
         exclusion_dates_by_year = {}
         for ed in exclusions_res.scalars():
-            exclusion_dates_by_year.setdefault(ed.year, set()).add(ed.date)
+            exclusion_dates_by_year.setdefault(ed.year, set()).add(ed.exclusion_date)
 
         created = 0
         skipped_existing = 0
@@ -1187,7 +1188,7 @@ class AdminController(Controller):
         old_status = su.status
         su.status = data.status
         if data.status == "withdrawn":
-            su.withdrawn_at = datetime.now(timezone.utc)
+            su.withdrawn_at = datetime.now(UTC)
         else:
             su.withdrawn_at = None
 
@@ -1232,7 +1233,9 @@ class AdminController(Controller):
                                 session_name=session.name,
                                 session_venue=getattr(loc, "name", None),
                                 session_address=getattr(loc, "address", None),
-                                session_time=_format_time_range(session.day_of_week, session.start_time, session.end_time),
+                                session_time=_format_time_range(
+                                    session.day_of_week, session.start_time, session.end_time
+                                ),
                                 first_session_date=first_session_date,
                                 calendar_url=calendar_url,
                                 what_to_bring=session.what_to_bring,
@@ -1249,7 +1252,9 @@ class AdminController(Controller):
                                 session_name=session.name,
                                 session_venue=getattr(loc, "name", None),
                                 session_address=getattr(loc, "address", None),
-                                session_time=_format_time_range(session.day_of_week, session.start_time, session.end_time),
+                                session_time=_format_time_range(
+                                    session.day_of_week, session.start_time, session.end_time
+                                ),
                                 update_title="Signup status updated",
                                 update_message=f"Your signup status changed from {old_status} to {su.status}.",
                                 affected_date=None,
@@ -1325,7 +1330,7 @@ class AdminController(Controller):
                             id=str(a.id),
                             occurrenceId=str(a.occurrence_id),
                             childId=str(a.child_id),
-                            status=cast(AttendanceStatus, a.status),
+                            status=cast("AttendanceStatus", a.status),
                             reason=a.reason,
                         )
                         if a
@@ -1398,7 +1403,7 @@ class AdminController(Controller):
             id=str(rec.id),
             occurrenceId=str(rec.occurrence_id),
             childId=str(rec.child_id),
-            status=cast(AttendanceStatus, rec.status),
+            status=cast("AttendanceStatus", rec.status),
             reason=rec.reason,
         )
 
@@ -1425,7 +1430,7 @@ class AdminController(Controller):
                 id=str(r.id),
                 occurrenceId=str(r.occurrence_id),
                 childId=str(r.child_id),
-                status=cast(AttendanceStatus, r.status),
+                status=cast("AttendanceStatus", r.status),
                 reason=r.reason,
             )
             for r in records

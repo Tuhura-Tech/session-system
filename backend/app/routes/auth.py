@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 
 from litestar import Controller, Request, get, post
 from litestar.di import Provide

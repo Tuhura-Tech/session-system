@@ -484,7 +484,9 @@ const SessionDetail: React.FC = () => {
                             {signup.studentName}
                           </button>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">\n                          {signup.guardianName}\n                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          \n {signup.guardianName}\n{" "}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {signup.email}
                         </td>

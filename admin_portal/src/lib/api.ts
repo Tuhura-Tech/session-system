@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // Always call the API directly (no nginx proxy). Prefer explicit env, fall back to prod URL.
-export const API_BASE_URL = (import.meta as any).env.API_BASE_URL || "https://sessions-api.tuhuratech.org.nz";
+export const API_BASE_URL =
+  (import.meta as any).env.API_BASE_URL ||
+  "https://sessions-api.tuhuratech.org.nz";
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,

@@ -1,7 +1,7 @@
 ---
 interface Props {
-  sessionId: string;
-  children;
+	sessionId: string;
+	children: Array<{ id: string; name: string; dateOfBirth?: string | null }>;
 }
 
 const { sessionId, children } = Astro.props;

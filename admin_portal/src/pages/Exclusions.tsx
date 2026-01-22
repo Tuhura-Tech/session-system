@@ -8,10 +8,7 @@ import {
   SuccessMessage,
 } from "../components/Alert";
 import Modal from "../components/Modal";
-import {
-  FormInput,
-  FormTextarea,
-} from "../components/FormComponents";
+import { FormInput, FormTextarea } from "../components/FormComponents";
 import { adminApi } from "../services/api";
 
 interface ExclusionDate {

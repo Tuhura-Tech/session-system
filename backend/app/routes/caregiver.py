@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, datetime
+from typing import Literal, cast
 
 from litestar import Controller, Request, get, patch, post
 from litestar.di import Provide
@@ -240,41 +241,41 @@ class CaregiverController(Controller):
             select(Signup).where(Signup.session_id == session_id, Signup.child_id == child.id)
         )
         existing = existing_result.scalar_one_or_none()
-        if existing:
-            if existing.status == "withdrawn":
-                # Re-activate a withdrawn signup (uniqueness constraint prevents creating a new row).
-                # If child is not age-eligible or session is in waitlist mode or at capacity, set to waitlisted
-                if not is_age_eligible or session.waitlist or session.is_at_capacity():
-                    existing.status = "waitlisted"
-                else:
-                    existing.status = "confirmed"
-                existing.withdrawn_at = None
-                existing.pickup_dropoff = data.pickup_dropoff
-                await db.flush()
+        if existing and existing.status == "withdrawn":
+            # Re-activate a withdrawn signup (uniqueness constraint prevents creating a new row).
+            # If child is not age-eligible or session is in waitlist mode or at capacity, set to waitlisted
+            if not is_age_eligible or session.waitlist or session.is_at_capacity():
+                existing.status = "waitlisted"
+            else:
+                existing.status = "confirmed"
+            existing.withdrawn_at = None
+            existing.pickup_dropoff = data.pickup_dropoff
+            await db.flush()
 
-                queue = get_queue()
+            queue = get_queue()
 
-                await queue.enqueue(
-                    "send_signup_confirmation_task",
-                    to_email=caregiver.email,
-                    caregiver_name=caregiver.name,
-                    child_name=child.name,
-                    session_name=session.name,
-                    session_venue=getattr(getattr(session, "session_location", None), "name", None),
-                    session_address=getattr(getattr(session, "session_location", None), "address", None),
-                    session_time=_format_time_range(session.day_of_week, session.start_time, session.end_time),
-                    term_summary=f"{getattr(session, 'year', '')}"
-                    if getattr(session, "session_type", "term") == "term"
-                    else None,
-                    what_to_bring=session.what_to_bring,
-                    signup_status=existing.status,
-                    signup_id=str(existing.id),
-                    session_id=str(session.id),
-                )
+            await queue.enqueue(
+                "send_signup_confirmation_task",
+                to_email=caregiver.email,
+                caregiver_name=caregiver.name,
+                child_name=child.name,
+                session_name=session.name,
+                session_venue=getattr(getattr(session, "session_location", None), "name", None),
+                session_address=getattr(getattr(session, "session_location", None), "address", None),
+                session_time=_format_time_range(session.day_of_week, session.start_time, session.end_time),
+                term_summary=f"{getattr(session, 'year', '')}"
+                if getattr(session, "session_type", "term") == "term"
+                else None,
+                what_to_bring=session.what_to_bring,
+                signup_status=existing.status,
+                signup_id=str(existing.id),
+                session_id=str(session.id),
+            )
 
-                return SignupCreateResponse(id=str(existing.id), status=existing.status)
-
-            return SignupCreateResponse(id=str(existing.id), status=existing.status)
+            return SignupCreateResponse(
+                id=str(existing.id),
+                status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", existing.status)
+            )
 
         # Determine status - if not age-eligible, always waitlist regardless of capacity
         if not is_age_eligible or session.waitlist or session.is_at_capacity():
@@ -364,7 +365,10 @@ class CaregiverController(Controller):
             signup.withdrawn_at = datetime.now(UTC)
             await db.flush()
 
-        return SignupCreateResponse(id=str(signup.id), status=signup.status)
+        return SignupCreateResponse(
+            id=str(signup.id),
+            status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", signup.status)
+        )
 
     @get(
         "/signup/{signup_id:uuid}/calendar-feed.ics",
