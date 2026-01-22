@@ -69,7 +69,7 @@ docker compose up -d
 uv run alembic -c alembic.ini upgrade head
 
 # run the API
-uv run python main.py              # http://localhost:8000
+uv run litestar run --debug              # http://localhost:8000
 
 # lint & format
 uv run ruff check .
