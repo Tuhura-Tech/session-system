@@ -84,20 +84,20 @@ async function createChildViaUI(page: Page, name: string, dateOfBirth: string): 
 /**
  * Helper to get a child ID from the page after creation
  */
-async function getChildIdFromPage(page: Page, childName: string): Promise<string> {
-	const childId = await page.evaluate(async (name) => {
-		const response = await fetch('http://localhost:8000/api/v1/children', {
-			method: 'GET',
-			credentials: 'include',
-		});
-		const children = await response.json();
-		const child = children.find((c: any) => c.name === name);
-		return child?.id;
-	}, childName);
+// async function getChildIdFromPage(page: Page, childName: string): Promise<string> {
+// 	const childId = await page.evaluate(async (name) => {
+// 		const response = await fetch('http://localhost:8000/api/v1/children', {
+// 			method: 'GET',
+// 			credentials: 'include',
+// 		});
+// 		const children = await response.json();
+// 		const child = children.find((c: any) => c.name === name);
+// 		return child?.id;
+// 	}, childName);
 
-	expect(childId).toBeDefined();
-	return childId;
-}
+// 	expect(childId).toBeDefined();
+// 	return childId;
+// }
 
 test.describe('Authentication Flow - Magic Link', () => {
 	test('should display login page with email input', async ({ page }) => {
