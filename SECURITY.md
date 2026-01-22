@@ -2,20 +2,9 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+We support the current version of the software only. Typically this means the security issue must be present in the `main` branch.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+We support privately reporting security vulnerabilities within GitHub. For instructions on how to do so we recommend following [this wiki page](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/report-a-vulnerability/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability).
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
