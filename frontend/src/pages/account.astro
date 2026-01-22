@@ -284,6 +284,17 @@ const profileIncomplete = !user.name || !user.phone;
 								</div>
 
 								<div>
+									<label for="child-gender" class="block text-sm font-semibold text-gray-700">Gender</label>
+									<input
+										type="text"
+										id="child-gender"
+										name="gender"
+										placeholder="e.g., Male, Female"
+										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									/>
+								</div>
+
+								<div>
 									<label for="child-school" class="block text-sm font-semibold text-gray-700">School Name</label>
 									<input
 										type="text"
@@ -378,6 +389,7 @@ const profileIncomplete = !user.name || !user.phone;
 		const otherInfo = (formData.get('otherInfo') as string) || undefined;
 		const region = (formData.get('region') as string) || undefined;
 		const ethnicity = (formData.get('ethnicity') as string) || undefined;
+		const gender = (formData.get('gender') as string) || undefined;
 		const schoolName = (formData.get('schoolName') as string) || undefined;
 
 		try {
@@ -389,6 +401,7 @@ const profileIncomplete = !user.name || !user.phone;
 				...(otherInfo && { otherInfo }),
 				...(region && { region }),
 				...(ethnicity && { ethnicity }),
+				...(gender && { gender }),
 				...(schoolName && { schoolName })
 			});
 			if (addChildMessage) {
