@@ -52,6 +52,7 @@ class ChildCreate(BaseModel):
     region: str | None = None
     ethnicity: str | None = None
     school_name: str | None = Field(None, alias="schoolName")
+    gender: str | None = None
 
 
 class ChildUpdate(BaseModel):
@@ -66,7 +67,7 @@ class ChildUpdate(BaseModel):
     region: str | None = None
     ethnicity: str | None = None
     school_name: str | None = Field(None, alias="schoolName")
-
+    gender: str | None = None
 
 class AuthenticatedSignupCreate(BaseModel):
     child_id: str = Field(..., alias="childId")
