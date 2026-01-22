@@ -12,7 +12,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  build-backend:
+  backend:
     name: Build Backend Image
     runs-on: ubuntu-latest
     permissions:
@@ -57,7 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
-  build-admin-portal:
+  admin-portal:
     name: Build Admin Portal Image
     runs-on: ubuntu-latest
     permissions:
@@ -102,7 +102,7 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
-  build-frontend:
+  frontend:
     name: Build Frontend Image
     runs-on: ubuntu-latest
     permissions:
