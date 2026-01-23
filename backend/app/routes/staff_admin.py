@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.admin_auth import admin_session_guard
 from app.db import get_db_session
 from app.models.session import Session
 from app.models.session_staff import SessionStaff
@@ -34,6 +35,7 @@ class StaffAdminController(Controller):
     path = "/api/v1/admin/staff"
     tags = ["Admin - Staff"]
     dependencies = {"db": Provide(get_db_session)}
+    guards = [admin_session_guard]
 
     @get("/", status_code=HTTP_200_OK, summary="List all staff")
     async def list_staff(
