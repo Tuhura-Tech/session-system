@@ -274,7 +274,7 @@ class CaregiverController(Controller):
 
             return SignupCreateResponse(
                 id=str(existing.id),
-                status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", existing.status)
+                status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", existing.status),
             )
 
         # Determine status - if not age-eligible, always waitlist regardless of capacity
@@ -366,8 +366,7 @@ class CaregiverController(Controller):
             await db.flush()
 
         return SignupCreateResponse(
-            id=str(signup.id),
-            status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", signup.status)
+            id=str(signup.id), status=cast("Literal['pending', 'confirmed', 'waitlisted', 'withdrawn']", signup.status)
         )
 
     @get(

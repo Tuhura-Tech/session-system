@@ -220,6 +220,7 @@ export async function createChild(input: {
 	otherInfo?: string;
 	region?: string;
 	ethnicity?: string;
+	gender?: string;
 	schoolName?: string;
 }): Promise<ApiChild> {
 	const res = await apiFetch('/api/v1/children', { method: 'POST', body: JSON.stringify(input) });
