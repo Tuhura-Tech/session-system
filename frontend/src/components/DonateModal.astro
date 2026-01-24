@@ -11,7 +11,6 @@
 			data-width="100%"
 			data-height="700"
 		>
-			<script is:inline src="https://cdn.raisely.com/v3/public/embed.js"></script>
 		</div>
 	</div>
 </dialog>
@@ -20,6 +19,31 @@
 	(function () {
 		var dlg = document.getElementById('donate-popover');
 		var trigger = document.getElementById('donate-trigger');
+		var raiselyScriptPromise = null;
+
+		function ensureRaiselyScriptLoaded() {
+			if (raiselyScriptPromise) return raiselyScriptPromise;
+			var existing = document.querySelector('script[data-raisely-embed]');
+			if (existing) {
+				raiselyScriptPromise = Promise.resolve();
+				return raiselyScriptPromise;
+			}
+			raiselyScriptPromise = new Promise(function (resolve, reject) {
+				var script = document.createElement('script');
+				script.src = 'https://cdn.raisely.com/v3/public/embed.js';
+				script.async = true;
+				script.setAttribute('data-raisely-embed', 'true');
+				script.onload = function () {
+					resolve();
+				};
+				script.onerror = function (err) {
+					raiselyScriptPromise = null;
+					reject(err);
+				};
+				document.head.appendChild(script);
+			});
+			return raiselyScriptPromise;
+		}
 
 		function computePosition() {
 			if (!dlg || !trigger) return;
@@ -56,6 +80,10 @@
 
 		function openPopover() {
 			if (!dlg || !(dlg instanceof HTMLDialogElement)) return;
+			// Lazy-load Raisely embed only when the popover is opened
+			ensureRaiselyScriptLoaded().catch(function () {
+				// Failing to load should not block the UI; user can retry
+			});
 			computePosition();
 			if (!dlg.open) dlg.show();
 			setExpanded();

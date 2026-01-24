@@ -367,6 +367,20 @@ const profileIncomplete = !user.name || !user.phone;
 	const profileForm = document.getElementById('profile-form') as HTMLFormElement;
 	const profileMessage = document.getElementById('profile-message');
 
+	// unhide input box for gender if "other" is selected
+	const genderSelect = document.getElementById('child-gender') as HTMLSelectElement;
+	const genderOtherInput = document.getElementById('child-gender-other') as HTMLInputElement;
+	genderSelect?.addEventListener('change', () => {
+		if (genderSelect.value === 'other') {
+			genderOtherInput.classList.remove('hidden');
+			genderOtherInput.required = true;
+		} else {
+			genderOtherInput.classList.add('hidden');
+			genderOtherInput.required = false;
+			genderOtherInput.value = '';
+		}
+	});
+
 	profileForm?.addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const formData = new FormData(profileForm);
