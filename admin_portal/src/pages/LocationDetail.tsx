@@ -74,7 +74,9 @@ export default function LocationDetail() {
 
 				// Add marker with popup
 				if (location.lat && location.lng) {
-					const popup = L.popup().setLatLng([location.lat, location.lng]).setContent(`
+					const popup = L.popup()
+						.setLatLng([location.lat, location.lng])
+						.setContent(`
               <div class="p-3 w-full max-w-xs">
                 <h3 class="font-bold text-lg mb-2">${location.name}</h3>
                 ${location.address ? `<p class="text-sm text-gray-700 mb-2">${location.address}</p>` : ''}

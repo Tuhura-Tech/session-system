@@ -33,6 +33,7 @@ class Child(Base, UUIDPrimaryKey, TimestampMixin):
     region: Mapped[str | None] = mapped_column(String(100), nullable=True)
     ethnicity: Mapped[str | None] = mapped_column(String(200), nullable=True)
     school_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Relationships
     caregiver: Mapped[Caregiver] = relationship("Caregiver", back_populates="children")

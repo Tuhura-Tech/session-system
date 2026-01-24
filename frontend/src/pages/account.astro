@@ -7,7 +7,7 @@ export const prerender = false;
 // Check if user is logged in
 const cookieHeader = Astro.request.headers.get('cookie') ?? undefined;
 let user = null;
-let children: Array<{id: string; name: string; dateOfBirth?: string | null}> = [];
+let children: Array<{ id: string; name: string; dateOfBirth?: string | null }> = [];
 
 try {
 	user = await fetchMe(cookieHeader);
@@ -31,83 +31,101 @@ const profileIncomplete = !user.name || !user.phone;
 	<main class="bg-gray-50 py-12 md:py-16">
 		<div class="container-custom">
 			<div class="mx-auto max-w-4xl">
-				{profileIncomplete && (
-					<div id="first-login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-						<div class="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-							<h2 class="text-2xl font-bold text-gray-900">Welcome!</h2>
-							<p class="mt-2 text-gray-600">Please complete your profile to get started.</p>
-							<form id="first-login-form" class="mt-6 space-y-4">
-								<div>
-									<label for="first-name" class="block text-sm font-semibold text-gray-700">Full Name *</label>
-									<input
-										type="text"
-										id="first-name"
-										name="name"
-										value={user.name || ''}
-										required
-										placeholder="John Doe"
-										class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-									/>
-								</div>
-
-								<div>
-									<label for="first-phone" class="block text-sm font-semibold text-gray-700">Phone Number *</label>
-									<input
-										type="tel"
-										id="first-phone"
-										name="phone"
-										value={user.phone || ''}
-										required
-										placeholder="+64 21 123 4567"
-										class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-									/>
-								</div>
-
-								<div>								<label for="first-referral" class="block text-sm font-semibold text-gray-700">How did you hear about us?</label>
-								<input
-									type="text"
-									id="first-referral"
-									name="referralSource"
-									placeholder="School newsletter, friend, social media..."
-									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-								/>
-							</div>
-
-							<div>									<label class="flex items-center gap-3">
+				{
+					profileIncomplete && (
+						<div
+							id="first-login-modal"
+							class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+						>
+							<div class="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+								<h2 class="text-2xl font-bold text-gray-900">Welcome!</h2>
+								<p class="mt-2 text-gray-600">Please complete your profile to get started.</p>
+								<form id="first-login-form" class="mt-6 space-y-4">
+									<div>
+										<label for="first-name" class="block text-sm font-semibold text-gray-700">
+											Full Name *
+										</label>
 										<input
-											type="checkbox"
-											id="first-newsletter"
-											name="newsletter"
-											class="h-4 w-4 rounded border-gray-300 text-tuhura-green focus:ring-tuhura-green"
+											type="text"
+											id="first-name"
+											name="name"
+											value={user.name || ''}
+											required
+											placeholder="John Doe"
+											class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 										/>
-										<span class="text-sm text-gray-700">Subscribe to our newsletter for updates and events</span>
-									</label>
-								</div>
+									</div>
 
-								<button type="submit" class="w-full btn btn-primary">
-									Complete Setup
-								</button>
-								<p id="first-login-message" class="hidden text-sm"></p>
-							</form>
+									<div>
+										<label for="first-phone" class="block text-sm font-semibold text-gray-700">
+											Phone Number *
+										</label>
+										<input
+											type="tel"
+											id="first-phone"
+											name="phone"
+											value={user.phone || ''}
+											required
+											placeholder="+64 21 123 4567"
+											class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
+
+									<div>
+										{' '}
+										<label for="first-referral" class="block text-sm font-semibold text-gray-700">
+											How did you hear about us?
+										</label>
+										<input
+											type="text"
+											id="first-referral"
+											name="referralSource"
+											placeholder="School newsletter, friend, social media..."
+											class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
+
+									<div>
+										{' '}
+										<label class="flex items-center gap-3">
+											<input
+												type="checkbox"
+												id="first-newsletter"
+												name="newsletter"
+												class="h-4 w-4 rounded border-gray-300 text-tuhura-green focus:ring-tuhura-green"
+											/>
+											<span class="text-sm text-gray-700">
+												Subscribe to our newsletter for updates and events
+											</span>
+										</label>
+									</div>
+
+									<button type="submit" class="btn btn-primary w-full">
+										Complete Setup
+									</button>
+									<p id="first-login-message" class="hidden text-sm" />
+								</form>
+							</div>
 						</div>
-					</div>
-				)}
+					)
+				}
 
 				<div class="flex items-center justify-between">
 					<h1 class="text-3xl font-bold text-gray-900">My Account</h1>
-					<button id="logout-btn" class="btn btn-secondary btn-sm">
-						Sign out
-					</button>
+					<button id="logout-btn" class="btn btn-secondary btn-sm"> Sign out </button>
 				</div>
 
-				{signupSuccess && (
-					<div class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-						<p class="text-emerald-800 font-semibold">✓ Signup successful!</p>
-						<p class="mt-1 text-sm text-emerald-700">
-							Your child has been registered for the session. You'll receive a confirmation email shortly.
-						</p>
-					</div>
-				)}
+				{
+					signupSuccess && (
+						<div class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+							<p class="font-semibold text-emerald-800">✓ Signup successful!</p>
+							<p class="mt-1 text-sm text-emerald-700">
+								Your child has been registered for the session. You'll receive a confirmation email
+								shortly.
+							</p>
+						</div>
+					)
+				}
 
 				<!-- Profile Section -->
 				<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -132,7 +150,7 @@ const profileIncomplete = !user.name || !user.phone;
 								id="name"
 								name="name"
 								value={user.name || ''}
-								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 							/>
 						</div>
 
@@ -143,13 +161,11 @@ const profileIncomplete = !user.name || !user.phone;
 								id="phone"
 								name="phone"
 								value={user.phone || ''}
-								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 							/>
 						</div>
 
-						<button type="submit" class="btn btn-primary">
-							Save profile
-						</button>
+						<button type="submit" class="btn btn-primary"> Save profile </button>
 						<p id="profile-message" class="hidden text-sm"></p>
 					</form>
 				</div>
@@ -158,65 +174,76 @@ const profileIncomplete = !user.name || !user.phone;
 				<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 					<div class="flex items-center justify-between">
 						<h2 class="text-xl font-semibold text-gray-900">My Children</h2>
-						<button id="add-child-btn" class="btn btn-primary btn-sm">
-							Add child
-						</button>
+						<button id="add-child-btn" class="btn btn-primary btn-sm"> Add child </button>
 					</div>
 
 					<div id="children-list" class="mt-6 space-y-4">
-						{children.length === 0 ? (
-							<p class="text-gray-600">No children added yet. Click "Add child" to get started.</p>
-						) : (
-							children.map((child) => (
-								<div class="rounded-lg border border-gray-200 p-4">
-									<div class="flex items-start justify-between">
-										<div>
-											<p class="font-semibold text-gray-900">{child.name}</p>
-											{child.dateOfBirth && (
-												<p class="text-sm text-gray-600">
-													Born: {new Date(child.dateOfBirth).toLocaleDateString('en-NZ')}
-												</p>
-											)}
+						{
+							children.length === 0 ? (
+								<p class="text-gray-600">
+									No children added yet. Click "Add child" to get started.
+								</p>
+							) : (
+								children.map((child) => (
+									<div class="rounded-lg border border-gray-200 p-4">
+										<div class="flex items-start justify-between">
+											<div>
+												<p class="font-semibold text-gray-900">{child.name}</p>
+												{child.dateOfBirth && (
+													<p class="text-sm text-gray-600">
+														Born: {new Date(child.dateOfBirth).toLocaleDateString('en-NZ')}
+													</p>
+												)}
+											</div>
+											<button
+												class="text-sm text-tuhura-green hover:text-tuhura-green/80"
+												data-child-id={child.id}
+											>
+												Edit
+											</button>
 										</div>
-										<button
-											class="text-sm text-tuhura-green hover:text-tuhura-green/80"
-											data-child-id={child.id}
-										>
-											Edit
-										</button>
 									</div>
-								</div>
-							))
-						)}
+								))
+							)
+						}
 					</div>
 				</div>
 
 				<!-- Add Child Modal -->
-		<div id="add-child-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
-				<div class="w-full max-w-2xl rounded-2xl bg-white shadow-xl max-h-[85vh] overflow-y-auto my-auto">
-					<div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
-						<h3 class="text-xl font-semibold text-gray-900">Add a child</h3>
-					</div>
-					<form id="add-child-form" class="p-6 space-y-4">
+				<div
+					id="add-child-modal"
+					class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+				>
+					<div
+						class="my-auto max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl"
+					>
+						<div class="sticky top-0 rounded-t-2xl border-b border-gray-200 bg-white px-6 py-4">
+							<h3 class="text-xl font-semibold text-gray-900">Add a child</h3>
+						</div>
+						<form id="add-child-form" class="space-y-4 p-6">
 							<div>
-								<label for="child-name" class="block text-sm font-semibold text-gray-700">Name <span class="text-red-600">*</span></label>
+								<label for="child-name" class="block text-sm font-semibold text-gray-700"
+									>Name <span class="text-red-600">*</span></label
+								>
 								<input
 									type="text"
 									id="child-name"
 									name="name"
 									required
-									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 								/>
 							</div>
 
 							<div>
-								<label for="child-dob" class="block text-sm font-semibold text-gray-700">Date of Birth <span class="text-red-600">*</span></label>
+								<label for="child-dob" class="block text-sm font-semibold text-gray-700"
+									>Date of Birth <span class="text-red-600">*</span></label
+								>
 								<input
 									type="date"
 									id="child-dob"
 									name="dateOfBirth"
 									required
-									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 								/>
 							</div>
 
@@ -233,72 +260,93 @@ const profileIncomplete = !user.name || !user.phone;
 							</div>
 
 							<div>
-								<label for="child-medical" class="block text-sm font-semibold text-gray-700">Medical Information</label>
+								<label for="child-medical" class="block text-sm font-semibold text-gray-700"
+									>Medical Information</label
+								>
 								<textarea
 									id="child-medical"
 									name="medicalInfo"
 									rows="2"
 									placeholder="Allergies, medications, or other medical information..."
-									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 								></textarea>
 							</div>
 
 							<div>
-
-								<label for="child-other" class="block text-sm font-semibold text-gray-700">Other Information</label>
+								<label for="child-other" class="block text-sm font-semibold text-gray-700"
+									>Other Information</label
+								>
 								<textarea
 									id="child-other"
 									name="otherInfo"
 									rows="2"
 									placeholder="Any other information we should know..."
-									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+									class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 								></textarea>
 							</div>
-						<!-- Demographic Information (Optional - for reporting) -->
-						<div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-							<p class="text-xs text-gray-600 mb-3">
-								<strong>Optional:</strong> The following information is used for reporting purposes only and helps us understand who we serve.
-							</p>
+							<!-- Demographic Information (Optional - for reporting) -->
+							<div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+								<p class="mb-3 text-xs text-gray-600">
+									<strong>Optional:</strong> The following information is used for reporting purposes
+									only and helps us understand who we serve.
+								</p>
 
-							<div class="space-y-3">
-								<div>
-									<label for="child-region" class="block text-sm font-semibold text-gray-700">Region</label>
-									<input
-										type="text"
-										id="child-region"
-										name="region"
-										placeholder="e.g., Wellington, Auckland"
-										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-									/>
-								</div>
+								<div class="space-y-3">
+									<div>
+										<label for="child-region" class="block text-sm font-semibold text-gray-700"
+											>Region</label
+										>
+										<input
+											type="text"
+											id="child-region"
+											name="region"
+											placeholder="e.g., Wellington, Auckland"
+											class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
 
-								<div>
-									<label for="child-ethnicity" class="block text-sm font-semibold text-gray-700">Ethnicity</label>
-									<input
-										type="text"
-										id="child-ethnicity"
-										name="ethnicity"
-										placeholder="e.g., NZ European, Māori, Pacific Islander"
-										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-									/>
-								</div>
+									<div>
+										<label for="child-ethnicity" class="block text-sm font-semibold text-gray-700"
+											>Ethnicity</label
+										>
+										<input
+											type="text"
+											id="child-ethnicity"
+											name="ethnicity"
+											placeholder="e.g., NZ European, Māori, Pacific Islander"
+											class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
 
-								<div>
-									<label for="child-school" class="block text-sm font-semibold text-gray-700">School Name</label>
-									<input
-										type="text"
-										id="child-school"
-										name="schoolName"
-										placeholder="e.g., Wellington Primary School"
-										class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
-									/>
+									<div>
+										<label for="child-gender" class="block text-sm font-semibold text-gray-700"
+											>Gender</label
+										>
+										<input
+											type="text"
+											id="child-gender"
+											name="gender"
+											placeholder="e.g., Male, Female"
+											class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
+
+									<div>
+										<label for="child-school" class="block text-sm font-semibold text-gray-700"
+											>School Name</label
+										>
+										<input
+											type="text"
+											id="child-school"
+											name="schoolName"
+											placeholder="e.g., Wellington Primary School"
+											class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
+										/>
+									</div>
 								</div>
 							</div>
-						</div>
 							<div class="flex gap-3">
-								<button type="submit" class="btn btn-primary flex-1">
-									Add child
-								</button>
+								<button type="submit" class="btn btn-primary flex-1"> Add child </button>
 								<button type="button" id="cancel-add-child" class="btn btn-secondary flex-1">
 									Cancel
 								</button>
@@ -318,6 +366,20 @@ const profileIncomplete = !user.name || !user.phone;
 	// Profile form
 	const profileForm = document.getElementById('profile-form') as HTMLFormElement;
 	const profileMessage = document.getElementById('profile-message');
+
+	// unhide input box for gender if "other" is selected
+	const genderSelect = document.getElementById('child-gender') as HTMLSelectElement;
+	const genderOtherInput = document.getElementById('child-gender-other') as HTMLInputElement;
+	genderSelect?.addEventListener('change', () => {
+		if (genderSelect.value === 'other') {
+			genderOtherInput.classList.remove('hidden');
+			genderOtherInput.required = true;
+		} else {
+			genderOtherInput.classList.add('hidden');
+			genderOtherInput.required = false;
+			genderOtherInput.value = '';
+		}
+	});
 
 	profileForm?.addEventListener('submit', async (e) => {
 		e.preventDefault();
@@ -378,18 +440,20 @@ const profileIncomplete = !user.name || !user.phone;
 		const otherInfo = (formData.get('otherInfo') as string) || undefined;
 		const region = (formData.get('region') as string) || undefined;
 		const ethnicity = (formData.get('ethnicity') as string) || undefined;
+		const gender = (formData.get('gender') as string) || undefined;
 		const schoolName = (formData.get('schoolName') as string) || undefined;
 
 		try {
-			await createChild({ 
-				name, 
+			await createChild({
+				name,
 				dateOfBirth,
 				...(mediaConsent && { mediaConsent }),
 				...(medicalInfo && { medicalInfo }),
 				...(otherInfo && { otherInfo }),
 				...(region && { region }),
 				...(ethnicity && { ethnicity }),
-				...(schoolName && { schoolName })
+				...(gender && { gender }),
+				...(schoolName && { schoolName }),
 			});
 			if (addChildMessage) {
 				addChildMessage.textContent = 'Child added successfully!';
@@ -421,11 +485,11 @@ const profileIncomplete = !user.name || !user.phone;
 
 		try {
 			// Update profile
-			await updateMe({ 
-				name, 
-				phone, 
+			await updateMe({
+				name,
+				phone,
 				...(newsletter && { newsletter }),
-				...(referralSource && { referralSource })
+				...(referralSource && { referralSource }),
 			});
 
 			if (firstLoginMessage) {

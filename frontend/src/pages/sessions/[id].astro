@@ -18,21 +18,21 @@ const TERM_DATES = {
 // function getCurrentOrNextTerm() {
 // 	const now = new Date();
 // 	const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-// 	
+//
 // 	// Check if we're currently in any term
 // 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
 // 		if (today >= term.start && today <= term.end) {
 // 			return { blockType, ...term, isCurrent: true };
 // 		}
 // 	}
-// 	
+//
 // 	// Find next upcoming term
 // 	for (const [blockType, term] of Object.entries(TERM_DATES)) {
 // 		if (today < term.start) {
 // 			return { blockType, ...term, isCurrent: false };
 // 		}
 // 	}
-// 	
+//
 // 	// If no upcoming term this year, return null
 // 	return null;
 // }
@@ -44,15 +44,15 @@ if (!session) {
 }
 
 // Filter occurrences to current or next term
-let displayOccurrences: Array<{starts_at: string, ends_at: string, cancelled?: boolean}> = [];
-let displayTermInfo: {name: string, isCurrent: boolean, isSpecial: boolean} | null = null;
+let displayOccurrences: Array<{ starts_at: string; ends_at: string; cancelled?: boolean }> = [];
+let displayTermInfo: { name: string; isCurrent: boolean; isSpecial: boolean } | null = null;
 
 if (session?.occurrences_by_block) {
 	const isSpecialSession = session.blocks?.includes('Special');
-	
+
 	if (isSpecialSession) {
 		// For special sessions, show the special block
-		const specialBlock = session.occurrences_by_block.find(b => b.block_type === 'special');
+		const specialBlock = session.occurrences_by_block.find((b) => b.block_type === 'special');
 		if (specialBlock) {
 			displayOccurrences = specialBlock.occurrences;
 			displayTermInfo = { name: specialBlock.block_name, isCurrent: false, isSpecial: true };
@@ -60,11 +60,11 @@ if (session?.occurrences_by_block) {
 	} else {
 		// For term sessions, find current or next TERM (skip special)
 		const today = new Date().toISOString().split('T')[0];
-		
+
 		// Check if we're in a term right now
 		for (const [blockType, term] of Object.entries(TERM_DATES)) {
 			if (blockType !== 'special' && today && today >= term.start && today <= term.end) {
-				const block = session.occurrences_by_block.find(b => b.block_name === term.name);
+				const block = session.occurrences_by_block.find((b) => b.block_name === term.name);
 				if (block) {
 					displayOccurrences = block.occurrences;
 					displayTermInfo = { name: term.name, isCurrent: true, isSpecial: false };
@@ -72,12 +72,12 @@ if (session?.occurrences_by_block) {
 				}
 			}
 		}
-		
+
 		// If not in a term, find next term (skip special)
 		if (!displayTermInfo) {
 			for (const [blockType, term] of Object.entries(TERM_DATES)) {
 				if (blockType !== 'special' && today && today < term.start) {
-					const block = session.occurrences_by_block.find(b => b.block_name === term.name);
+					const block = session.occurrences_by_block.find((b) => b.block_name === term.name);
 					if (block) {
 						displayOccurrences = block.occurrences;
 						displayTermInfo = { name: term.name, isCurrent: false, isSpecial: false };
@@ -94,7 +94,7 @@ function formatOccurrenceRange(startsAt: string, endsAt: string): string {
 	// Format: 2026-02-09T15:30:00+13:00 or similar
 	const startDate = new Date(startsAt);
 	const endDate = new Date(endsAt);
-	
+
 	// Extract the date and time components in NZST timezone
 	// Note: We use toLocaleString to format in NZST without converting from UTC
 	const dateStr = startDate.toLocaleDateString('en-NZ', {
@@ -115,7 +115,7 @@ function formatOccurrenceRange(startsAt: string, endsAt: string): string {
 		hour12: true,
 		timeZone: 'Pacific/Auckland',
 	});
-	
+
 	return `${dateStr} • ${startTimeStr}–${endTimeStr}`;
 }
 ---
@@ -150,7 +150,7 @@ function formatOccurrenceRange(startsAt: string, endsAt: string): string {
 									<span class="mx-2 text-gray-300">•</span>
 									<span class="font-semibold">When:</span> {session.time}
 								</p>
-								{session.blocks && session.blocks.length > 0 && session.blocks[0] != "Special" && (
+								{session.blocks && session.blocks.length > 0 && session.blocks[0] != 'Special' && (
 									<p class="text-gray-700">
 										<span class="font-semibold">Terms:</span> {session.blocks.join(', ')}
 									</p>
@@ -193,12 +193,13 @@ function formatOccurrenceRange(startsAt: string, endsAt: string): string {
 										<div>
 											<h3 class="font-semibold text-gray-900">
 												Session dates
-											{displayTermInfo && (
-												<span class="ml-2 text-sm font-normal text-gray-600">
-													({displayTermInfo.isSpecial 
-														? displayTermInfo.name 
-														: `${displayTermInfo.isCurrent ? 'Current Term' : 'Next Term'}: ${displayTermInfo.name}`
-													})
+												{displayTermInfo && (
+													<span class="ml-2 text-sm font-normal text-gray-600">
+														(
+														{displayTermInfo.isSpecial
+															? displayTermInfo.name
+															: `${displayTermInfo.isCurrent ? 'Current Term' : 'Next Term'}: ${displayTermInfo.name}`}
+														)
 													</span>
 												)}
 											</h3>
@@ -254,7 +255,9 @@ function formatOccurrenceRange(startsAt: string, endsAt: string): string {
 							</div>
 							<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 								<h2 class="text-xl font-semibold text-gray-900">Location</h2>
-								{session.venueName ? <p class="mt-3 text-gray-900 font-medium">{session.venueName}</p> : null}
+								{session.venueName ? (
+									<p class="mt-3 font-medium text-gray-900">{session.venueName}</p>
+								) : null}
 								<p class="mt-3 text-gray-700">{session.address}</p>
 								<p class="mt-1 text-gray-700">{session.time}</p>
 								<div class="mt-4">

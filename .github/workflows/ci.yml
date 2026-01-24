@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16@sha256:f992505e18f114c1e5102ac4dcf00f791b44462f6a423d899320f0bbf80e386f
+        image: postgres:18@sha256:5773fe724c49c42a7a9ca70202e11e1dff21fb7235b335a73f39297d200b73a2
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
@@ -87,12 +87,45 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
         run: uv run pytest -v --cov=app --cov-report=xml
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+  backend-migrations:
+    name: Backend Migrations Check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18@sha256:5773fe724c49c42a7a9ca70202e11e1dff21fb7235b335a73f39297d200b73a2
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7
         with:
-          files: ./backend/coverage.xml
-          flags: backend
-          fail_ci_if_error: false
+          version: latest
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: uv sync
+
+      - name: Check migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+        run: uv run alembic -c alembic.ini upgrade head
 
   # Admin Portal jobs
   admin-portal-lint:
@@ -116,13 +149,13 @@ jobs:
         working-directory: ./admin_portal
         run: pnpm install --frozen-lockfile
 
-      - name: Run TypeScript check
+      - name: Run Biome lint
         working-directory: ./admin_portal
-        run: pnpm exec tsc --noEmit
+        run: pnpm run lint:ci
 
       - name: Run Prettier check
         working-directory: ./admin_portal
-        run: pnpm exec prettier --check "src/**/*.{ts,tsx}"
+        run: pnpm run format:check
 
   admin-portal-test:
     name: Admin Portal Tests
@@ -152,14 +185,6 @@ jobs:
       - name: Run tests
         working-directory: ./admin_portal
         run: pnpm run test
-
-      - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: admin-portal-test-results
-          path: admin_portal/playwright-report/
-          retention-days: 30
 
   admin-portal-build:
     name: Admin Portal Build
@@ -213,6 +238,10 @@ jobs:
         working-directory: ./frontend
         run: pnpm run lint:ci
 
+      - name: Run Prettier check
+        working-directory: ./frontend
+        run: pnpm run format:check
+
       - name: Run Astro check
         working-directory: ./frontend
         run: pnpm run check
@@ -245,14 +274,6 @@ jobs:
       - name: Run e2e tests
         working-directory: ./frontend
         run: pnpm run test:e2e
-
-      - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: frontend-test-results
-          path: frontend/playwright-report/
-          retention-days: 30
 
   frontend-build:
     name: Frontend Build

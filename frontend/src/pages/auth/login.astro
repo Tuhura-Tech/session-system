@@ -14,23 +14,21 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 				<div id="login-form" class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 					<form id="magic-link-form">
 						<div>
-							<label for="email" class="block text-sm font-semibold text-gray-700">Email address</label>
+							<label for="email" class="block text-sm font-semibold text-gray-700"
+								>Email address</label
+							>
 							<input
 								type="email"
 								id="email"
 								name="email"
 								required
 								autocomplete="email"
-								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors placeholder:text-gray-400 focus:border-tuhura-green focus:outline-none focus:ring-2 focus:ring-tuhura-green/20"
+								class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-colors placeholder:text-gray-400 focus:border-tuhura-green focus:ring-2 focus:ring-tuhura-green/20 focus:outline-none"
 								placeholder="your@email.com"
 							/>
 						</div>
 
-						<button
-							type="submit"
-							id="submit-btn"
-							class="btn btn-primary mt-6 w-full"
-						>
+						<button type="submit" id="submit-btn" class="btn btn-primary mt-6 w-full">
 							Send magic link
 						</button>
 
@@ -40,7 +38,8 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 				</div>
 
 				<p class="mt-6 text-center text-sm text-gray-600">
-					Don't have an account? No worries! We'll create one for you automatically when you sign in.
+					Don't have an account? No worries! We'll create one for you automatically when you sign
+					in.
 				</p>
 			</div>
 		</div>
@@ -56,7 +55,7 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
-		
+
 		const email = emailInput?.value?.trim();
 		if (!email) return;
 
@@ -67,11 +66,14 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 		successMsg.classList.add('hidden');
 
 		try {
-			const response = await fetch('https://sessions-api.tuhuratech.org.nz/api/v1/auth/magic-link', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, return_to: returnTo }),
-			});
+			const response = await fetch(
+				'https://sessions-api.tuhuratech.org.nz/api/v1/auth/magic-link',
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email, return_to: returnTo }),
+				},
+			);
 
 			if (!response.ok) {
 				throw new Error('Failed to send magic link');
@@ -81,7 +83,6 @@ const returnTo = Astro.url.searchParams.get('returnTo') || '/account';
 			successMsg.textContent = `Check your email! We've sent a magic link to ${email}`;
 			successMsg.classList.remove('hidden');
 			form.reset();
-
 		} catch (error) {
 			errorMsg.textContent = 'Something went wrong. Please try again.';
 			errorMsg.classList.remove('hidden');

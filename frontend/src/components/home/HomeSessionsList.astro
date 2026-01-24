@@ -43,20 +43,23 @@ for (const session of sessions) {
 }
 ---
 
-
 <div>
-	{sessions.length === 0 ? (
-		<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-			<p class="text-lg font-semibold text-gray-900">No sessions match your filters</p>
-			<p class="mt-2 text-sm text-gray-600">Try a different search term, region, or age group.</p>
-			<button type="button" id="clear-filters-link" class="btn btn-secondary btn-sm mt-4 inline-flex">
-				Clear filters
-			</button>
-		</div>
-	) : (
-		<div class="mt-3 space-y-10">
-			{
-				regionOrder.map((region) => {
+	{
+		sessions.length === 0 ? (
+			<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+				<p class="text-lg font-semibold text-gray-900">No sessions match your filters</p>
+				<p class="mt-2 text-sm text-gray-600">Try a different search term, region, or age group.</p>
+				<button
+					type="button"
+					id="clear-filters-link"
+					class="btn btn-secondary btn-sm mt-4 inline-flex"
+				>
+					Clear filters
+				</button>
+			</div>
+		) : (
+			<div class="mt-3 space-y-10">
+				{regionOrder.map((region) => {
 					const regionSessions = sessionsByRegion.get(region) ?? [];
 					if (!regionSessions.length) return null;
 					return (
@@ -73,110 +76,117 @@ for (const session of sessions) {
 										data-age={(session.age || '').split('(')[0]?.trim() ?? ''}
 										class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
 									>
-									<div class="flex items-start justify-between gap-2">
-										<h4 class="text-lg leading-tight font-semibold text-gray-900">
-											{session.name}
-										</h4>
-										<div class="flex flex-col gap-1.5 items-end">
-											{session.waitlist ? (
-												<span class="inline-flex shrink-0 items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
-													Waitlist
-												</span>
-											) : (
-												<span class="inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">
-													Open
-												</span>
-											)}
-											{/* Show "Starting soon" for special sessions */}
-											{isSpecialSession(session) && getDaysUntil('2026-01-19') <= 7 && getDaysUntil('2026-01-19') >= 0 && (
-												<span class="inline-flex shrink-0 items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
-													Starting in {getDaysUntil('2026-01-19')} {getDaysUntil('2026-01-19') === 1 ? 'day' : 'days'}
-												</span>
-											)}
+										<div class="flex items-start justify-between gap-2">
+											<h4 class="text-lg leading-tight font-semibold text-gray-900">
+												{session.name}
+											</h4>
+											<div class="flex flex-col items-end gap-1.5">
+												{session.waitlist ? (
+													<span class="inline-flex shrink-0 items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
+														Waitlist
+													</span>
+												) : (
+													<span class="inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">
+														Open
+													</span>
+												)}
+												{/* Show "Starting soon" for special sessions */}
+												{isSpecialSession(session) &&
+													getDaysUntil('2026-01-19') <= 7 &&
+													getDaysUntil('2026-01-19') >= 0 && (
+														<span class="inline-flex shrink-0 items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
+															Starting in {getDaysUntil('2026-01-19')}{' '}
+															{getDaysUntil('2026-01-19') === 1 ? 'day' : 'days'}
+														</span>
+													)}
+											</div>
 										</div>
-									</div>
-									
-									{/* Block badges - only show for term sessions */}
-									{!isSpecialSession(session) && session.blocks && session.blocks.length > 0 && (
-										<div class="mt-3 flex flex-wrap gap-1.5">
-											{session.blocks.map((block: string) => (
-												<span 
-													class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700"
-												>
-													{block}
-												</span>
-											))}
+
+										{/* Block badges - only show for term sessions */}
+										{!isSpecialSession(session) && session.blocks && session.blocks.length > 0 && (
+											<div class="mt-3 flex flex-wrap gap-1.5">
+												{session.blocks.map((block: string) => (
+													<span class="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+														{block}
+													</span>
+												))}
+											</div>
+										)}
+
+										<p class="mt-3 flex items-center gap-2 text-sm text-gray-600">
+											<svg
+												class="h-3 w-3 text-gray-400"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+												stroke-width="2"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+												/>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+												/>
+											</svg>
+											{session.location}
+										</p>
+										<p class="mt-1 flex items-center gap-2 text-sm text-gray-600">
+											<svg
+												class="h-3 w-3 text-gray-400"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+												stroke-width="2"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d={
+														isSpecialSession(session)
+															? 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5'
+															: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'
+													}
+												/>
+											</svg>
+											{isSpecialSession(session)
+												? formatDateRange('2026-01-19', '2026-01-23')
+												: session.time}
+										</p>
+										<p class="mt-1 flex items-center gap-2 text-sm text-gray-600">
+											<svg
+												class="h-3 w-3 text-gray-400"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+												stroke-width="2"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+												/>
+											</svg>
+											{session.age}
+										</p>
+										<div class="mt-4 flex flex-wrap gap-2">
+											<a class="btn btn-primary btn-sm" href={`/signup?session=${session.id}`}>
+												{session.waitlist ? 'Join waitlist' : 'Sign up'}
+											</a>
+											<a class="btn btn-secondary btn-sm" href={`/sessions/${session.id}`}>
+												Details
+											</a>
 										</div>
-									)}
-									
-									<p class="mt-3 flex items-center gap-2 text-sm text-gray-600">
-										<svg
-											class="h-3 w-3 text-gray-400"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											stroke-width="2"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-											/>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-											/>
-										</svg>
-										{session.location}
-									</p>
-									<p class="mt-1 flex items-center gap-2 text-sm text-gray-600">
-										<svg
-											class="h-3 w-3 text-gray-400"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											stroke-width="2"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d={isSpecialSession(session) ? "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" : "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"}
-											/>
-										</svg>
-										{isSpecialSession(session) ? formatDateRange('2026-01-19', '2026-01-23') : session.time}
-									</p>
-									<p class="mt-1 flex items-center gap-2 text-sm text-gray-600">
-										<svg
-											class="h-3 w-3 text-gray-400"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											stroke-width="2"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-											/>
-										</svg>
-										{session.age}
-									</p>
-									<div class="mt-4 flex flex-wrap gap-2">
-										<a class="btn btn-primary btn-sm" href={`/signup?session=${session.id}`}>
-											{session.waitlist ? 'Join waitlist' : 'Sign up'}
-										</a>
-										<a class="btn btn-secondary btn-sm" href={`/sessions/${session.id}`}>
-											Details
-										</a>
-									</div>
-								</article>
-							))}
-						</div>
+									</article>
+								))}
+							</div>
 						</section>
-				);
-			})
-		}
-		</div>
-	)}
+					);
+				})}
+			</div>
+		)
+	}
 </div>
