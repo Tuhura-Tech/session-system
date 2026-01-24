@@ -18,7 +18,7 @@ if (!session) {
 // Check if user is logged in
 const cookieHeader = Astro.request.headers.get('cookie') ?? undefined;
 let user = null;
-let children: Array<{id: string; name: string; dateOfBirth?: string | null}> = [];
+let children: Array<{ id: string; name: string; dateOfBirth?: string | null }> = [];
 
 try {
 	user = await fetchMe(cookieHeader);
@@ -27,11 +27,15 @@ try {
 	}
 } catch (e) {
 	// Not logged in, redirect to login with return URL
-	return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+	return Astro.redirect(
+		`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`,
+	);
 }
 
 if (!user) {
-	return Astro.redirect(`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`);
+	return Astro.redirect(
+		`/auth/login?returnTo=${encodeURIComponent(`/signup?session=${sessionId}`)}`,
+	);
 }
 ---
 
@@ -39,97 +43,119 @@ if (!user) {
 	<main class="bg-gray-50 py-12 md:py-16">
 		<div class="container-custom">
 			<div class="mx-auto max-w-2xl">
-				{session ? (
-<>
-						<h1 class="text-3xl font-bold text-gray-900">Sign up for {session.name}</h1>
-						
-						<!-- Session Details -->
-						<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-							<div class="space-y-4">
-								<div>
-									<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">When & Where</h3>
-									<p class="mt-1 text-lg text-gray-900">{session.time}</p>
-									<p class="mt-1 text-gray-700">{session.venueName || session.location}</p>
-									{session.address && <p class="text-sm text-gray-600">{session.address}</p>}
+				{
+					session ? (
+						<>
+							<h1 class="text-3xl font-bold text-gray-900">Sign up for {session.name}</h1>
+
+							<div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+								<div class="space-y-4">
+									<div>
+										<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+											When & Where
+										</h3>
+										<p class="mt-1 text-lg text-gray-900">{session.time}</p>
+										<p class="mt-1 text-gray-700">{session.venueName || session.location}</p>
+										{session.address && <p class="text-sm text-gray-600">{session.address}</p>}
+									</div>
+
+									{session.term_summary && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												Term
+											</h3>
+											<p class="mt-1 text-gray-900">{session.term_summary}</p>
+										</div>
+									)}
+
+									{session.age && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												Age Group
+											</h3>
+											<p class="mt-1 text-gray-900">{session.age}</p>
+										</div>
+									)}
+
+									{session.what_to_bring && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												What to Bring
+											</h3>
+											<p class="mt-1 text-gray-900">{session.what_to_bring}</p>
+										</div>
+									)}
+
+									{session.public_instructions && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												Important Information
+											</h3>
+											<p class="mt-1 whitespace-pre-line text-gray-900">
+												{session.public_instructions}
+											</p>
+										</div>
+									)}
+
+									{session.arrival_instructions && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												Arrival Instructions
+											</h3>
+											<p class="mt-1 whitespace-pre-line text-gray-900">
+												{session.arrival_instructions}
+											</p>
+										</div>
+									)}
+
+									{session.prerequisites && (
+										<div>
+											<h3 class="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+												Prerequisites
+											</h3>
+											<p class="mt-1 text-gray-900">{session.prerequisites}</p>
+										</div>
+									)}
+
+									{session.waitlist && (
+										<div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+											<p class="text-sm font-semibold text-amber-900">
+												⏳ This session is currently waitlisted
+											</p>
+											<p class="mt-1 text-sm text-amber-700">
+												You'll be notified if a spot becomes available.
+											</p>
+										</div>
+									)}
 								</div>
+							</div>
 
-								{session.term_summary && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Term</h3>
-										<p class="mt-1 text-gray-900">{session.term_summary}</p>
-									</div>
-								)}
-
-								{session.age && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Age Group</h3>
-										<p class="mt-1 text-gray-900">{session.age}</p>
-									</div>
-								)}
-
-								{session.what_to_bring && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">What to Bring</h3>
-										<p class="mt-1 text-gray-900">{session.what_to_bring}</p>
-									</div>
-								)}
-
-								{session.public_instructions && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Important Information</h3>
-										<p class="mt-1 text-gray-900 whitespace-pre-line">{session.public_instructions}</p>
-									</div>
-								)}
-
-								{session.arrival_instructions && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Arrival Instructions</h3>
-										<p class="mt-1 text-gray-900 whitespace-pre-line">{session.arrival_instructions}</p>
-									</div>
-								)}
-
-								{session.prerequisites && (
-									<div>
-										<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Prerequisites</h3>
-										<p class="mt-1 text-gray-900">{session.prerequisites}</p>
-									</div>
-								)}
-
-								{session.waitlist && (
-									<div class="rounded-lg bg-amber-50 border border-amber-200 p-3">
-										<p class="text-sm font-semibold text-amber-900">⏳ This session is currently waitlisted</p>
-										<p class="mt-1 text-sm text-amber-700">You'll be notified if a spot becomes available.</p>
-</div>
-)}
-</div>
-</div>
-
-{children.length === 0 ? (
-<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-<h2 class="text-xl font-semibold text-gray-900">Add a child first</h2>
-<p class="mt-2 text-gray-600">
-You need to add at least one child to your account before you can sign up for sessions.
-</p>
-<a href="/account" class="btn btn-primary mt-6">
-Go to account settings
-</a>
-</div>
-) : (
-<SignupForm sessionId={sessionId} children={children} />
-)}
-</>
-) : (
-<div>
-<h1 class="text-3xl font-bold text-gray-900">Session not found</h1>
-<p class="mt-2 text-gray-600">
-The session you're looking for doesn't exist.
-</p>
-<a href="/" class="btn btn-primary mt-6">
-Back to sessions
-</a>
-</div>
-)}
-</div>
-</div>
-</main>
+							{children.length === 0 ? (
+								<div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+									<h2 class="text-xl font-semibold text-gray-900">Add a child first</h2>
+									<p class="mt-2 text-gray-600">
+										You need to add at least one child to your account before you can sign up for
+										sessions.
+									</p>
+									<a href="/account" class="btn btn-primary mt-6">
+										Go to account settings
+									</a>
+								</div>
+							) : (
+								<SignupForm sessionId={sessionId} children={children} />
+							)}
+						</>
+					) : (
+						<div>
+							<h1 class="text-3xl font-bold text-gray-900">Session not found</h1>
+							<p class="mt-2 text-gray-600">The session you're looking for doesn't exist.</p>
+							<a href="/" class="btn btn-primary mt-6">
+								Back to sessions
+							</a>
+						</div>
+					)
+				}
+			</div>
+		</div>
+	</main>
 </Layout>

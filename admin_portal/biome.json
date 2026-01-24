@@ -10,6 +10,9 @@
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
+		"domains": {
+			"react": "recommended"
+		},
 		"rules": {
 			"recommended": true,
 			"suspicious": {

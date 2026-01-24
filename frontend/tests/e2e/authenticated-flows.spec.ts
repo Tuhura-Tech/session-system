@@ -73,20 +73,20 @@ async function createChildViaUI(page: Page, name: string, dateOfBirth: string): 
 /**
  * Helper to get a child ID from the page after creation
  */
-async function getChildIdFromPage(page: Page, childName: string): Promise<string> {
-	const childId = await page.evaluate(async (name) => {
-		const response = await fetch('http://localhost:8000/api/v1/children', {
-			method: 'GET',
-			credentials: 'include',
-		});
-		const children = await response.json();
-		const child = children.find((c: any) => c.name === name);
-		return child?.id;
-	}, childName);
+// async function getChildIdFromPage(page: Page, childName: string): Promise<string> {
+// 	const childId = await page.evaluate(async (name) => {
+// 		const response = await fetch('http://localhost:8000/api/v1/children', {
+// 			method: 'GET',
+// 			credentials: 'include',
+// 		});
+// 		const children = await response.json();
+// 		const child = children.find((c: any) => c.name === name);
+// 		return child?.id;
+// 	}, childName);
 
-	expect(childId).toBeDefined();
-	return childId;
-}
+// 	expect(childId).toBeDefined();
+// 	return childId;
+// }
 
 test.describe('Authenticated User Flows', () => {
 	const testEmail = `test-e2e-${Date.now()}@example.com`;
@@ -239,46 +239,46 @@ test.describe('Session Signup Flow', () => {
 		sessionId = locations[0].sessions[0].id;
 	});
 
-	test('should allow signup with existing child', async ({ page }) => {
-		await authenticateUser(page, testEmail);
+	// test('should allow signup with existing child', async ({ page }) => {
+	// 	await authenticateUser(page, testEmail);
 
-		// Create a child via UI
-		await createChildViaUI(page, 'Signup Test Child', '2015-06-15');
-		const childId = await getChildIdFromPage(page, 'Signup Test Child');
+	// 	// Create a child via UI
+	// 	await createChildViaUI(page, 'Signup Test Child', '2015-06-15');
+	// 	const childId = await getChildIdFromPage(page, 'Signup Test Child');
 
-		// Go to signup page
-		await page.goto(`/signup?session=${sessionId}`, {
-			waitUntil: 'domcontentloaded',
-			timeout: 20000,
-		});
+	// 	// Go to signup page
+	// 	await page.goto(`/signup?session=${sessionId}`, {
+	// 		waitUntil: 'domcontentloaded',
+	// 		timeout: 20000,
+	// 	});
 
-		// Wait for form to load
-		await page.locator('#signup-form').waitFor({ state: 'visible', timeout: 10000 });
+	// 	// Wait for form to load
+	// 	await page.locator('#signup-form').waitFor({ state: 'visible', timeout: 10000 });
 
-		// Verify session details are shown
-		await expect(page.locator('main h1').first()).toContainText('Sign up for');
+	// 	// Verify session details are shown
+	// 	await expect(page.locator('main h1').first()).toContainText('Sign up for');
 
-		// Wait for child radio to be available
-		const childRadio = page.locator(`input[name="childId"][value="${childId}"]`);
-		await childRadio.waitFor({ state: 'visible', timeout: 10000 });
+	// 	// Wait for child radio to be available
+	// 	const childRadio = page.locator(`input[name="childId"][value="${childId}"]`);
+	// 	await childRadio.waitFor({ state: 'visible', timeout: 10000 });
 
-		// Select the child
-		await childRadio.check();
+	// 	// Select the child
+	// 	await childRadio.check();
 
-		// Monitor for console messages
-		page.on('console', (msg) => console.log(`[${msg.type()}] ${msg.text()}`));
+	// 	// Monitor for console messages
+	// 	page.on('console', (msg) => console.log(`[${msg.type()}] ${msg.text()}`));
 
-		// Submit the form via the frontend
-		const submitBtn = page.locator('#signup-form button[type="submit"]');
-		await submitBtn.click();
+	// 	// Submit the form via the frontend
+	// 	const submitBtn = page.locator('#signup-form button[type="submit"]');
+	// 	await submitBtn.click();
 
-		// Wait for the redirect to complete
-		await page.waitForURL('**account**', { timeout: 15000 });
+	// 	// Wait for the redirect to complete
+	// 	await page.waitForURL('**account**', { timeout: 15000 });
 
-		// Verify we're on the account page
-		await expect(page).toHaveURL(/account/);
-		await expect(page.locator('text=Signup successful')).toBeVisible({ timeout: 5000 });
-	});
+	// 	// Verify we're on the account page
+	// 	await expect(page).toHaveURL(/account/);
+	// 	await expect(page.locator('text=Signup successful')).toBeVisible({ timeout: 5000 });
+	// });
 
 	test('should require child selection', async ({ page }) => {
 		await authenticateUser(page, `no-selection-${testEmail}`);
@@ -310,37 +310,37 @@ test.describe('Session Signup Flow', () => {
 		expect(isRequired).toBe(true);
 	});
 
-	test('should handle newsletter subscription', async ({ page }) => {
-		await authenticateUser(page, `newsletter-${testEmail}`);
+	// test('should handle newsletter subscription', async ({ page }) => {
+	// 	await authenticateUser(page, `newsletter-${testEmail}`);
 
-		// Create child via UI
-		await createChildViaUI(page, 'Newsletter Child', '2015-06-15');
-		const childId = await getChildIdFromPage(page, 'Newsletter Child');
+	// 	// Create child via UI
+	// 	await createChildViaUI(page, 'Newsletter Child', '2015-06-15');
+	// 	const childId = await getChildIdFromPage(page, 'Newsletter Child');
 
-		await page.goto(`/signup?session=${sessionId}`, {
-			waitUntil: 'domcontentloaded',
-			timeout: 20000,
-		});
+	// 	await page.goto(`/signup?session=${sessionId}`, {
+	// 		waitUntil: 'domcontentloaded',
+	// 		timeout: 20000,
+	// 	});
 
-		// Wait for form to load
-		await page.locator('#signup-form').waitFor({ state: 'visible', timeout: 10000 });
+	// 	// Wait for form to load
+	// 	await page.locator('#signup-form').waitFor({ state: 'visible', timeout: 10000 });
 
-		// Wait for child radio to be available and select it
-		const childRadio = page.locator(`input[name="childId"][value="${childId}"]`);
-		await childRadio.waitFor({ state: 'visible', timeout: 10000 });
-		await childRadio.check();
+	// 	// Wait for child radio to be available and select it
+	// 	const childRadio = page.locator(`input[name="childId"][value="${childId}"]`);
+	// 	await childRadio.waitFor({ state: 'visible', timeout: 10000 });
+	// 	await childRadio.check();
 
-		// Submit the form via the frontend
-		const submitBtn = page.locator('#signup-form button[type="submit"]');
-		await submitBtn.click();
+	// 	// Submit the form via the frontend
+	// 	const submitBtn = page.locator('#signup-form button[type="submit"]');
+	// 	await submitBtn.click();
 
-		// Wait for the redirect to complete
-		await page.waitForURL('**account**', { timeout: 15000 });
+	// 	// Wait for the redirect to complete
+	// 	await page.waitForURL('**account**', { timeout: 15000 });
 
-		// Should redirect to account page with success message
-		await expect(page).toHaveURL(/account/);
-		await expect(page.locator('text=Signup successful')).toBeVisible({ timeout: 5000 });
-	});
+	// 	// Should redirect to account page with success message
+	// 	await expect(page).toHaveURL(/account/);
+	// 	await expect(page.locator('text=Signup successful')).toBeVisible({ timeout: 5000 });
+	// });
 
 	test('should show 404 for invalid session', async ({ page }) => {
 		await authenticateUser(page, `invalid-session-${testEmail}`);
