@@ -105,7 +105,7 @@ const Students: React.FC = () => {
 												</td>
 												<td className="px-6 py-4 text-sm whitespace-nowrap">
 													<button
-														onClick={() => navigate(`/children/${child.id}`)}
+														onClick={() => navigate(`/students/${child.id}`)}
 														className="font-medium text-blue-600 hover:text-blue-900"
 													>
 														View Details

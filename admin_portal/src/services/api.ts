@@ -287,12 +287,12 @@ export const adminApi = {
 
 	// Children / Notes
 	getChild: async (childId: string): Promise<ChildDetails> => {
-		const { data } = await api.get(`/admin/children/${childId}`);
+		const { data } = await api.get(`/admin/students/${childId}`);
 		return data;
 	},
 
 	getChildNotes: async (childId: string): Promise<ChildNote[]> => {
-		const { data } = await api.get(`/admin/children/${childId}/notes`);
+		const { data } = await api.get(`/admin/students/${childId}/notes`);
 		return data;
 	},
 
@@ -300,7 +300,7 @@ export const adminApi = {
 		childId: string,
 		payload: { note: string; author?: string | null },
 	): Promise<ChildNote> => {
-		const { data } = await api.post(`/admin/children/${childId}/notes`, {
+		const { data } = await api.post(`/admin/students/${childId}/notes`, {
 			note: payload.note,
 			author: payload.author ?? null,
 		});
@@ -309,7 +309,7 @@ export const adminApi = {
 
 	// Children list
 	listChildren: async (): Promise<ChildDetails[]> => {
-		const { data } = await api.get('/admin/children');
+		const { data } = await api.get('/admin/students');
 		return data;
 	},
 

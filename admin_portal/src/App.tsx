@@ -122,7 +122,7 @@ function App() {
 					/>
 
 					<Route
-						path="/children/:id"
+						path="/students/:id"
 						element={
 							<ProtectedRoute>
 								<Child />
