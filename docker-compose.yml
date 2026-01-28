@@ -16,7 +16,7 @@ services:
       - "5432:5432"
 
   redis:
-    image: docker.io/library/redis:7-alpine
+    image: docker.io/library/redis:8-alpine@sha256:0804c395e634e624243387d3c3a9c45fcaca876d313c2c8b52c3fdf9a912dded
     container_name: sessions-redis
     volumes:
       - redis_data:/data
