@@ -11,8 +11,8 @@ Session: {{ session_name }}
 Venue: {{ session_venue }}
 Address: {{ session_address }}
 Time: {{ session_time }}
-{% if session_date %}Date: {{ session_date }}
-{% endif %}
+Date: {{ session_date }}
+
 
 {% if what_to_bring %}
 DON'T FORGET TO BRING

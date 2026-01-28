@@ -447,7 +447,7 @@ const SessionDetail: React.FC = () => {
 											<tr key={signup.id}>
 												<td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
 													<button
-														onClick={() => navigate(`/children/${signup.childId}`)}
+														onClick={() => navigate(`/students/${signup.childId}`)}
 														className="text-blue-600 hover:text-blue-800"
 													>
 														{signup.studentName}

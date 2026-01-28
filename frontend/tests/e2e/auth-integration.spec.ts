@@ -86,7 +86,7 @@ async function createChildViaUI(page: Page, name: string, dateOfBirth: string): 
  */
 // async function getChildIdFromPage(page: Page, childName: string): Promise<string> {
 // 	const childId = await page.evaluate(async (name) => {
-// 		const response = await fetch('http://localhost:8000/api/v1/children', {
+// 		const response = await fetch('http://localhost:8000/api/v1/students', {
 // 			method: 'GET',
 // 			credentials: 'include',
 // 		});

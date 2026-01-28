@@ -1,7 +1,7 @@
 with import <nixpkgs> {};
 mkShell {
   buildInputs = [
-    python3
+    python313
     uv
     nodejs
     pnpm

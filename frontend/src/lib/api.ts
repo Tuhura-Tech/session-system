@@ -207,7 +207,7 @@ export async function logout(): Promise<{ ok: boolean }> {
 }
 
 export async function listChildren(cookies?: string): Promise<ApiChild[]> {
-	const res = await apiFetch('/api/v1/children', undefined, cookies);
+	const res = await apiFetch('/api/v1/students', undefined, cookies);
 	if (!res.ok) throw new Error(`Failed to list children: ${res.status}`);
 	return (await res.json()) as ApiChild[];
 }
@@ -223,7 +223,7 @@ export async function createChild(input: {
 	gender?: string;
 	schoolName?: string;
 }): Promise<ApiChild> {
-	const res = await apiFetch('/api/v1/children', { method: 'POST', body: JSON.stringify(input) });
+	const res = await apiFetch('/api/v1/students', { method: 'POST', body: JSON.stringify(input) });
 	if (!res.ok) throw new Error(`Failed to create child: ${res.status}`);
 	return (await res.json()) as ApiChild;
 }
@@ -232,7 +232,7 @@ export async function updateChild(
 	childId: string,
 	input: { name?: string | null; dateOfBirth?: string | null },
 ): Promise<ApiChild> {
-	const res = await apiFetch(`/api/v1/children/${childId}`, {
+	const res = await apiFetch(`/api/v1/students/${childId}`, {
 		method: 'PATCH',
 		body: JSON.stringify(input),
 	});
